@@ -67,3 +67,15 @@ model PlayHistory {
   createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
+// ==========================================
+// 📚 ตารางคู่มือคำสั่ง (Docs)
+// ==========================================
+model CommandDoc {
+  id          String   @id @default(uuid())
+  os          String   // 'linux' หรือ 'windows'
+  category    String   // หมวดหมู่ เช่น 'File System', 'Network'
+  command     String   // ตัวคำสั่ง เช่น 'ls', 'dir'
+  description String   // คำอธิบายคำสั่ง
+  example     String?  // ตัวอย่างการพิมพ์ (มีหรือไม่มีก็ได้)
+  createdAt   DateTime @default(now())
+}

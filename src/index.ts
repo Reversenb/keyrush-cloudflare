@@ -9,6 +9,8 @@ import leaderboardRoute from './routes/leaderboard'
 import authRoute from './routes/auth'
 import missionRoute from './routes/mission'
 import adminRoute from './routes/admin'
+import docsRoute from './routes/docs';
+import adminDocsRoute from './routes/adminDocs';
 
 // 🌟 ผูกตัวแปร "DB" และ "JWT_SECRET" จาก wrangler.json
 type Bindings = {
@@ -116,4 +118,6 @@ app.route('/api/user', userRoute)
 app.route('/api/leaderboard', leaderboardRoute)
 app.route('/api/mission', missionRoute)
 app.route('/api/admin', adminRoute)
+app.route('/api/docs', docsRoute);
+app.route('/api/admin/docs', adminDocsRoute);
 export default app
