@@ -1,0 +1,69 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "sqlite"
+  
+}
+
+model Mission {
+  id              String     @id @default(uuid()) 
+  os              String     
+  difficulty      String     @default("basic") 
+  level           Int        
+  title           String     
+  description     String     
+  expectedCommand String     
+  hint            String?    
+  rewardExp       Int        @default(100) 
+  createdAt       DateTime   @default(now()) 
+  updatedAt       DateTime   @updatedAt      
+  Progress        Progress[]
+  @@unique([os, level]) 
+}
+
+model Progress {
+  id         String    @id @default(uuid())
+  isPassed   Boolean   @default(false)
+  errorCount Int       @default(0) 
+  wpm        Int       @default(0) 
+  accuracy   Int       @default(0) 
+  passedAt   DateTime? 
+  userId     String
+  missionId  String
+  Mission    Mission   @relation(fields: [missionId], references: [id], onDelete: Cascade)
+  User       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@unique([userId, missionId])
+}
+
+model User {
+  id               String    @id @default(uuid())
+  username         String    @unique  
+  email            String?   @unique
+  googleId         String?   @unique 
+  displayName      String?
+  avatar           String?   @default("Felix")
+  bio              String?
+  role             String    @default("user")
+  adminFavorites   String    @default("[]") 
+  linuxLevel       Int       @default(1)
+  linuxExp         Int       @default(0)
+  windowsLevel     Int       @default(1)
+  windowsExp       Int       @default(0)
+  createdAt        DateTime  @default(now())
+  Progress         Progress[]
+  playHistories    PlayHistory[]
+}
+
+model PlayHistory {
+  id        String   @id @default(uuid())
+  userId    String
+  os        String   
+  level     Int      
+  wpm       Int      
+  accuracy  Int      
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
