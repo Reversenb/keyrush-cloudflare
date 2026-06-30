@@ -25,7 +25,7 @@ missionRoute.get('/:os/:level', async (c) => {
     if (mission) {
       return c.json({ success: true, data: mission })
     } else {
-      return c.json({ success: false, message: "ยังไม่ได้สร้างด่านนี้ครับบอส!" }, 404)
+      return c.json({ success: false, message: "ยังไม่ได้สร้างด่านนี้ครับMP!" }, 404)
     }
   } catch (error) {
     console.error("Get Mission Error:", error)
