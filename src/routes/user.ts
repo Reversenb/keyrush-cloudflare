@@ -3,6 +3,8 @@ import { PrismaClient } from '@prisma/client'
 import { PrismaD1 } from '@prisma/adapter-d1'
 import type { D1Database } from '@cloudflare/workers-types'
 import { authenticateToken } from '../middlewares/auth'
+import { z } from 'zod'
+import { zValidator } from '@hono/zod-validator'
 
 // 🌟 ผูก Type ให้ TypeScript รู้จักตัวแปร Environment และ Variables (ข้อมูล user จาก Token)
 type Bindings = { DB: D1Database; JWT_SECRET: string }
@@ -73,12 +75,27 @@ userRoute.get('/progress', async (c) => {
 })
 
 // ==========================================
-// 🚀 API 3: อัปเดตโปรไฟล์ (ชื่อแสดง, รูป, ไบโอ)
+// 🛡️ กฎ Zod สำหรับเช็คข้อมูลตอนอัปเดตโปรไฟล์
 // ==========================================
-userRoute.put('/profile', async (c) => {
+const profileSchema = z.object({
+  displayName: z.string().max(50, 'ชื่อแสดงยาวเกินไป').optional(),
+  avatar: z.string().optional(),
+  bio: z.string().max(500, 'ประวัติยาวเกินไป').optional()
+})
+
+// ==========================================
+// 🚀 API 3: อัปเดตโปรไฟล์ (ชื่อแสดง, รูป, ไบโอ) [ติดเกราะ Zod]
+// ==========================================
+userRoute.put('/profile', 
+  zValidator('json', profileSchema, (result, c) => {
+    if (!result.success) {
+      return c.json({ success: false, message: 'ข้อมูลโปรไฟล์ไม่ถูกต้อง (Zod Blocked)' }, 400)
+    }
+  }),
+  async (c) => {
   try {
     const authUser = c.get('user')
-    const { displayName, avatar, bio } = await c.req.json()
+    const { displayName, avatar, bio } = c.req.valid('json') // 🌟 ดึงข้อมูลที่ Zod สแกนแล้ว
     
     const adapter = new PrismaD1(c.env.DB)
     const prisma = new PrismaClient({ adapter })
@@ -125,19 +142,32 @@ userRoute.get('/stats', async (c) => {
 })
 
 // ==========================================
-// 🚀 API 5: บันทึกเซฟเกม (อัปเลเวล & แจก EXP)
+// 🛡️ กฎ Zod สำหรับเช็คข้อมูลตอนบันทึกเซฟเกม
 // ==========================================
-userRoute.put('/progress', async (c) => {
+const progressSchema = z.object({
+  // 🌟 แก้ตรงนี้: ใช้คำว่า message แทน errorMap ได้เลยครับ
+  os: z.enum(['linux', 'windows'], { message: 'ระบบขัดข้อง: OS ไม่ถูกต้อง' }),
+  level: z.coerce.number().int().min(1).max(100, { message: 'Level ผิดปกติ' }),
+  wpm: z.coerce.number().int().min(0).max(300).optional(),
+  accuracy: z.coerce.number().int().min(0).max(100).optional()
+})
+
+// ==========================================
+// 🚀 API 5: บันทึกเซฟเกม (อัปเลเวล & แจก EXP) [ติดเกราะ Zod]
+// ==========================================
+userRoute.put('/progress', 
+  // 🌟 ด่านตรวจ Zod: ป้องกันการส่งคะแนนผี หรือข้อมูลขยะ
+  zValidator('json', progressSchema, (result, c) => {
+    if (!result.success) {
+      console.error("🚨 Hacker Detected or Bad Data:", result.error.issues)
+      return c.json({ success: false, message: 'ข้อมูลเซฟเกมไม่ถูกต้อง (Zod Blocked)' }, 400)
+    }
+  }), 
+  async (c) => {
   try {
     const authUser = c.get('user')
-    const { os, level, wpm, accuracy } = await c.req.json()
-
-    if (os !== 'linux' && os !== 'windows') return c.json({ success: false, message: 'OS ไม่ถูกต้อง' }, 400)
-
-    const playedMissionLevel = parseInt(level, 10)
-    if (isNaN(playedMissionLevel) || playedMissionLevel < 1 || playedMissionLevel > 100) {
-      return c.json({ success: false, message: 'Level ผิดปกติ' }, 400)
-    }
+    // 🌟 ดึงข้อมูลจาก valid('json') แทน await c.req.json() เพื่อให้ได้ข้อมูลที่ปลอดภัย 100%
+    const { os, level: playedMissionLevel, wpm, accuracy } = c.req.valid('json') 
 
     const adapter = new PrismaD1(c.env.DB)
     const prisma = new PrismaClient({ adapter })
@@ -186,20 +216,15 @@ userRoute.put('/progress', async (c) => {
 
     // 4. เซฟสถิติ (WPM/Accuracy) ลง PlayHistory
     if (wpm !== undefined && accuracy !== undefined) {
-      const parsedWpm = parseInt(wpm, 10)
-      const parsedAccuracy = parseInt(accuracy, 10)
-
-      if (parsedWpm >= 0 && parsedWpm <= 300 && parsedAccuracy >= 0 && parsedAccuracy <= 100) {
-        await prisma.playHistory.create({
-          data: {
-            userId: authUser.userId,
-            os: os,
-            level: playedMissionLevel,
-            wpm: parsedWpm,
-            accuracy: parsedAccuracy
-          }
-        })
-      }
+      await prisma.playHistory.create({
+        data: {
+          userId: authUser.userId,
+          os: os,
+          level: playedMissionLevel,
+          wpm: wpm,
+          accuracy: accuracy
+        }
+      })
     }
 
     const responseMessage = isReplaying ? 'บันทึกสถิติสำเร็จ! (ทบทวนด่านเก่า ไม่ได้รับ EXP เพิ่ม)' : 'บันทึกข้อมูลและรับ EXP สำเร็จ!'
