@@ -2,9 +2,12 @@ import { Hono } from 'hono'
 import { PrismaClient } from '@prisma/client'
 import { PrismaD1 } from '@prisma/adapter-d1'
 import type { D1Database } from '@cloudflare/workers-types'
-
-type Bindings = { DB: D1Database }
+import { authenticateToken, authorizeAdmin } from '../middlewares/auth'
+type Bindings = { DB: D1Database; JWT_SECRET: string }
 const adminDocsRoute = new Hono<{ Bindings: Bindings }>()
+
+
+adminDocsRoute.use('/*', authenticateToken, authorizeAdmin)
 
 // ==========================================
 // ➕ API: สร้างข้อมูลคำสั่งใหม่ (Create)

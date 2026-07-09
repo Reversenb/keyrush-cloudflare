@@ -8,8 +8,5 @@
       "database_name": "keyrush-db",
       "database_id": "7bbc94d0-dbbc-4e6f-8e05-a5877eb97faa"
     }
-  ],
-  "vars": {
-    "JWT_SECRET": "KeyRush_Super_Secret_Key_2026_HackThePlanet"
-  }
+  ]
 }

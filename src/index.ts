@@ -34,7 +34,7 @@ app.use('*', secureHeaders())
 app.use('/api/*', cors({
   origin: [
     'http://localhost:3000', 
-    'https://keyrush-swart.vercel.app/',   
+    'https://keyrush-swart.vercel.app',   
   ],
   allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowHeaders: ['Content-Type', 'Authorization'],

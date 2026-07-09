@@ -12,13 +12,17 @@ type Bindings = {
 
 const seedRoute = new Hono<{ Bindings: Bindings }>()
 
+
 // 🛡️ ทริคลับระดับ Pro: สร้างด่านตรวจพาสเวิร์ด (Middleware)
 // ทุกๆ API ในไฟล์นี้ จะต้องผ่านด่านตรวจนี้ก่อนเสมอ!
 seedRoute.use('*', async (c, next) => {
-  const userSecret = c.req.query('secret')
+  // 🌟 แก้บรรทัดนี้: เปลี่ยนจาก c.req.query เป็น c.req.header
+  const userSecret = c.req.header('X-Seed-Secret')
+  
   if (userSecret !== c.env.SEED_PASSWORD) {
     return c.json({ error: 'Access Denied! Hacker detected 🚨' }, 403)
   }
+  
   // ถ้ารหัสถูก ให้ไปทำงานต่อในฟังก์ชันด้านล่างได้
   await next()
 })
