@@ -2,6 +2,8 @@ import { Hono } from 'hono'
 import { PrismaClient } from '@prisma/client'
 import { PrismaD1 } from '@prisma/adapter-d1'
 import type { D1Database } from '@cloudflare/workers-types'
+import { z } from 'zod' // 🌟 1. Import Zod
+import { zValidator } from '@hono/zod-validator' // 🌟 2. Import ตัวตรวจจับของ Hono
 
 // 🌟 Import ยาม 2 คนมาเฝ้าประตู
 import { authenticateToken, authorizeAdmin } from '../middlewares/auth'
@@ -12,6 +14,31 @@ const adminRoute = new Hono<{ Bindings: Bindings; Variables: Variables }>()
 
 // 🛑 ตั้งด่านตรวจ: ทุก API ในไฟล์นี้ต้องผ่าน 2 ยามนี้ก่อนเสมอ!
 adminRoute.use('/*', authenticateToken, authorizeAdmin)
+
+// ==========================================
+// 🛡️ กฎ Zod สำหรับการสร้างและแก้ไขด่าน
+// ==========================================
+const missionCreateSchema = z.object({
+  os: z.enum(['linux', 'windows'], { message: 'OS ต้องเป็น linux หรือ windows เท่านั้น' }),
+  difficulty: z.string().optional().default('basic'),
+  level: z.coerce.number().int().min(1, { message: 'Level ต้องเป็นตัวเลขที่มากกว่า 0' }),
+  title: z.string().min(1, { message: 'ต้องระบุชื่อโจทย์' }),
+  description: z.string().min(1, { message: 'ต้องระบุคำอธิบาย' }),
+  expectedCommand: z.string().min(1, { message: 'ต้องระบุคำสั่งที่ถูกต้อง' }),
+  hint: z.string().optional(),
+  rewardExp: z.coerce.number().int().optional().default(100)
+})
+
+const missionUpdateSchema = z.object({
+  title: z.string().min(1, { message: 'ต้องระบุชื่อโจทย์' }).optional(),
+  description: z.string().min(1, { message: 'ต้องระบุคำอธิบาย' }).optional(),
+  expectedCommand: z.string().min(1, { message: 'ต้องระบุคำสั่งที่ถูกต้อง' }).optional(),
+  hint: z.string().optional()
+})
+
+const favoriteSchema = z.object({
+  missionId: z.string().min(1, { message: 'ต้องระบุ ID ของโจทย์' })
+})
 
 // ==========================================
 // 🚀 API: ดึงโจทย์ทั้งหมด (สำหรับหน้า Dashboard Admin)
@@ -30,17 +57,21 @@ adminRoute.get('/missions', async (c) => {
 })
 
 // ==========================================
-// 🚀 API: สร้างโจทย์ด่านใหม่
+// 🚀 API: สร้างโจทย์ด่านใหม่ [ติดเกราะ Zod]
 // ==========================================
-adminRoute.post('/missions', async (c) => {
+adminRoute.post('/missions', 
+  zValidator('json', missionCreateSchema, (result, c) => {
+    if (!result.success) return c.json({ success: false, message: 'ข้อมูลไม่ถูกต้อง', error: result.error.issues }, 400)
+  }),
+  async (c) => {
   try {
-    const body = await c.req.json()
-    const { os, difficulty, level, title, description, expectedCommand, hint, rewardExp } = body
+    // 🌟 ใช้ valid('json') Zod จะทำหน้าที่แปลง level และ rewardExp ให้เป็นตัวเลขเรียบร้อยแล้ว
+    const { os, difficulty, level, title, description, expectedCommand, hint, rewardExp } = c.req.valid('json')
     const adapter = new PrismaD1(c.env.DB)
     const prisma = new PrismaClient({ adapter })
 
     const existingMission = await prisma.mission.findFirst({
-      where: { os: os, level: parseInt(level) }
+      where: { os: os, level: level } // ไม่ต้องใช้ parseInt แล้ว!
     })
 
     if (existingMission) {
@@ -49,8 +80,8 @@ adminRoute.post('/missions', async (c) => {
 
     const newMission = await prisma.mission.create({
       data: {
-        os, difficulty: difficulty || 'basic', level: parseInt(level), title, description,
-        expectedCommand, hint, rewardExp: parseInt(rewardExp) || 100 
+        os, difficulty, level, title, description,
+        expectedCommand, hint, rewardExp
       }
     })
     return c.json({ success: true, message: 'เพิ่มภารกิจใหม่สำเร็จ!', data: newMission }, 201)
@@ -60,12 +91,16 @@ adminRoute.post('/missions', async (c) => {
 })
 
 // ==========================================
-// 🚀 API: อัปเดต/แก้ไขโจทย์
+// 🚀 API: อัปเดต/แก้ไขโจทย์ [ติดเกราะ Zod]
 // ==========================================
-adminRoute.put('/missions/:id', async (c) => {
+adminRoute.put('/missions/:id', 
+  zValidator('json', missionUpdateSchema, (result, c) => {
+    if (!result.success) return c.json({ success: false, message: 'ข้อมูลไม่ถูกต้อง', error: result.error.issues }, 400)
+  }),
+  async (c) => {
   try {
     const id = c.req.param('id')
-    const { title, description, expectedCommand, hint } = await c.req.json()
+    const { title, description, expectedCommand, hint } = c.req.valid('json')
     const adapter = new PrismaD1(c.env.DB)
     const prisma = new PrismaClient({ adapter })
 
@@ -96,12 +131,16 @@ adminRoute.delete('/missions/:id', async (c) => {
 })
 
 // ==========================================
-// 🚀 API: กด Favorite โจทย์สำหรับ Admin
+// 🚀 API: กด Favorite โจทย์สำหรับ Admin [ติดเกราะ Zod]
 // ==========================================
-adminRoute.put('/favorites', async (c) => {
+adminRoute.put('/favorites', 
+  zValidator('json', favoriteSchema, (result, c) => {
+    if (!result.success) return c.json({ success: false, message: 'ข้อมูลไม่ถูกต้อง', error: result.error.issues }, 400)
+  }),
+  async (c) => {
   try {
     const authUser = c.get('user')
-    const { missionId } = await c.req.json()
+    const { missionId } = c.req.valid('json')
     const adapter = new PrismaD1(c.env.DB)
     const prisma = new PrismaClient({ adapter })
 

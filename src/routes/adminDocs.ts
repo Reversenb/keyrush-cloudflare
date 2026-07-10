@@ -2,19 +2,45 @@ import { Hono } from 'hono'
 import { PrismaClient } from '@prisma/client'
 import { PrismaD1 } from '@prisma/adapter-d1'
 import type { D1Database } from '@cloudflare/workers-types'
+import { z } from 'zod' // 🌟 1. Import Zod
+import { zValidator } from '@hono/zod-validator' // 🌟 2. Import ตัวตรวจจับของ Hono
+
 import { authenticateToken, authorizeAdmin } from '../middlewares/auth'
+
 type Bindings = { DB: D1Database; JWT_SECRET: string }
 const adminDocsRoute = new Hono<{ Bindings: Bindings }>()
-
 
 adminDocsRoute.use('/*', authenticateToken, authorizeAdmin)
 
 // ==========================================
-// ➕ API: สร้างข้อมูลคำสั่งใหม่ (Create)
+// 🛡️ กฎ Zod สำหรับการสร้างและแก้ไข Docs
 // ==========================================
-adminDocsRoute.post('/', async (c) => {
+const docCreateSchema = z.object({
+  os: z.enum(['linux', 'windows'], { message: 'OS ต้องเป็น linux หรือ windows เท่านั้น' }),
+  category: z.string().min(1, { message: 'ต้องระบุหมวดหมู่ (Category)' }),
+  command: z.string().min(1, { message: 'ต้องระบุคำสั่ง (Command)' }),
+  description: z.string().min(1, { message: 'ต้องระบุคำอธิบาย' }),
+  example: z.string().optional().nullable() // เป็นค่าว่าง หรือ null ก็ได้
+})
+
+const docUpdateSchema = z.object({
+  os: z.enum(['linux', 'windows'], { message: 'OS ต้องเป็น linux หรือ windows เท่านั้น' }).optional(),
+  category: z.string().min(1, { message: 'ต้องระบุหมวดหมู่ (Category)' }).optional(),
+  command: z.string().min(1, { message: 'ต้องระบุคำสั่ง (Command)' }).optional(),
+  description: z.string().min(1, { message: 'ต้องระบุคำอธิบาย' }).optional(),
+  example: z.string().optional().nullable()
+})
+
+// ==========================================
+// ➕ API: สร้างข้อมูลคำสั่งใหม่ (Create) [ติดเกราะ Zod]
+// ==========================================
+adminDocsRoute.post('/', 
+  zValidator('json', docCreateSchema, (result, c) => {
+    if (!result.success) return c.json({ success: false, message: 'ข้อมูลไม่ถูกต้อง', error: result.error.issues }, 400)
+  }),
+  async (c) => {
   try {
-    const body = await c.req.json()
+    const body = c.req.valid('json') // 🌟 ดึงข้อมูลที่ผ่านการสแกนแล้ว
     const adapter = new PrismaD1(c.env.DB)
     const prisma = new PrismaClient({ adapter })
 
@@ -28,7 +54,7 @@ adminDocsRoute.post('/', async (c) => {
       }
     })
     
-    return c.json({ success: true, data: doc })
+    return c.json({ success: true, data: doc }, 201)
   } catch (err: any) {
     console.error("Create Doc Error:", err)
     return c.json({ success: false, message: 'สร้างคำสั่งไม่สำเร็จ' }, 500)
@@ -36,12 +62,16 @@ adminDocsRoute.post('/', async (c) => {
 })
 
 // ==========================================
-// ✏️ API: แก้ไขข้อมูลคำสั่งเดิม (Update)
+// ✏️ API: แก้ไขข้อมูลคำสั่งเดิม (Update) [ติดเกราะ Zod]
 // ==========================================
-adminDocsRoute.put('/:id', async (c) => {
+adminDocsRoute.put('/:id', 
+  zValidator('json', docUpdateSchema, (result, c) => {
+    if (!result.success) return c.json({ success: false, message: 'ข้อมูลไม่ถูกต้อง', error: result.error.issues }, 400)
+  }),
+  async (c) => {
   try {
     const id = c.req.param('id')
-    const body = await c.req.json()
+    const body = c.req.valid('json') // 🌟 ดึงข้อมูลที่ผ่านการสแกนแล้ว
     const adapter = new PrismaD1(c.env.DB)
     const prisma = new PrismaClient({ adapter })
 
