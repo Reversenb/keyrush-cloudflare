@@ -9,4 +9,8 @@
       "database_id": "7bbc94d0-dbbc-4e6f-8e05-a5877eb97faa"
     }
   ]
+  ,
+  "vars": {
+    "GOOGLE_CLIENT_ID": "670116826366-56ac2m6ql18arvlakp1vgu7v565e6b18.apps.googleusercontent.com"
+  }
 }
