@@ -46,9 +46,14 @@ authRoute.post('/google',
     
     const tokenInfo: any = await tokenInfoRes.json()
 
-    // ป้องกันการขโมย Token จากแอปอื่น (Audience Check)
-    if (tokenInfo.aud !== c.env.GOOGLE_CLIENT_ID) {
-      return c.json({ success: false, message: 'Access Denied: Token ไม่ได้เป็นของระบบ KeyRush' }, 403)
+   if (tokenInfo.aud !== c.env.GOOGLE_CLIENT_ID) {
+      return c.json({ 
+        success: false, 
+        message: 'Access Denied: Token ไม่ได้เป็นของระบบ KeyRush',
+        
+        debug_expected: c.env.GOOGLE_CLIENT_ID, 
+        debug_got_from_google: tokenInfo.aud 
+      }, 403)
     }
 
     // 🛡️ ด่านตรวจที่ 2: ดึง UserInfo พร้อมจัดการ Error

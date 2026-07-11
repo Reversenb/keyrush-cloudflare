@@ -1,6 +1,6 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
-import { secureHeaders } from 'hono/secure-headers' // 🌟 1. เพิ่มตัวนี้เข้ามา
+import { secureHeaders } from 'hono/secure-headers' 
 import { PrismaClient } from '@prisma/client'
 import { PrismaD1 } from '@prisma/adapter-d1'
 import type { D1Database } from '@cloudflare/workers-types'
@@ -22,15 +22,12 @@ type Bindings = {
 }
 
 const app = new Hono<{ Bindings: Bindings }>()
-app.use('/api/*', rateLimiter)
+
 // ========================================================
-// 🛡️ CORE SECURITY LAYER (ด่านตรวจคนเข้าเมือง)
+// 🛡️ CORE SECURITY LAYER (เรียงลำดับใหม่ให้เป๊ะ!)
 // ========================================================
 
-// 1. สวมเกราะป้องกัน HTTP Headers (ป้องกัน XSS, Clickjacking) -> ได้เกรด A+ แน่นอน
-app.use('*', secureHeaders())
-
-// 2. ล็อกเป้าหมาย (CORS) อนุญาตเฉพาะหน้าเว็บตัวเองเท่านั้น!
+// 🌟 1. ด่านแรก: เปิดประตูรับหน้าเว็บตัวเองก่อน
 app.use('/api/*', cors({
   origin: [
     'http://localhost:3000', 
@@ -40,6 +37,19 @@ app.use('/api/*', cors({
   allowHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
 }))
+
+// 🌟 2. ด่านสอง: ใส่เกราะ HTTP Headers (จะได้มีเกราะติดไปกับทุก Response)
+app.use('*', secureHeaders())
+app.use('*', async (c, next) => {
+  c.header('Content-Security-Policy', "default-src 'none'; frame-ancestors 'none';")
+  c.header('Permissions-Policy', "camera=(), microphone=(), geolocation=(), browsing-topics=()")
+  c.header('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload')
+  await next()
+})
+
+// 🌟 3. ด่านสาม: ตรวจจับสแปม (Rate Limiter) ค่อยทำงานหลังจากใส่ CORS เสร็จแล้ว
+app.use('/api/*', rateLimiter)
+
 // ========================================================
 
 app.get('/', (c) => {
@@ -60,9 +70,7 @@ app.get('/api/mission/all', async (c) => {
   }
 })
 
-// ========================================================
-// 🚀 ลงทะเบียน Routes ทั้งหมดที่นี่
-// ========================================================
+// 🚀 Routes ทั้งหมด
 app.route('/api/auth', authRoute)
 app.route('/api/user', userRoute)
 app.route('/api/leaderboard', leaderboardRoute)
