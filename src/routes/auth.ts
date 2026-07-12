@@ -51,7 +51,7 @@ authRoute.post('/google',
         success: false, 
         message: 'Access Denied: Token ไม่ได้เป็นของระบบ KeyRush',
         
-        debug_expected: c.env.GOOGLE_CLIENT_ID, 
+       
         debug_got_from_google: tokenInfo.aud 
       }, 403)
     }

@@ -2,12 +2,14 @@ import { Hono } from 'hono'
 import { PrismaClient } from '@prisma/client'
 import { PrismaD1 } from '@prisma/adapter-d1'
 import type { D1Database } from '@cloudflare/workers-types'
+import { z } from 'zod'
+import { zValidator } from '@hono/zod-validator'
 
 type Bindings = { DB: D1Database }
 const missionRoute = new Hono<{ Bindings: Bindings }>()
 
 // ==========================================
-// 🚀 API: ดึงโจทย์เฉพาะด่าน (เอาไว้เล่นเกม)
+// 🚀 API 1: ดึงโจทย์ (ซ่อนเฉลย 100%)
 // ==========================================
 missionRoute.get('/:os/:level', async (c) => {
   try {
@@ -17,9 +19,19 @@ missionRoute.get('/:os/:level', async (c) => {
     const adapter = new PrismaD1(c.env.DB)
     const prisma = new PrismaClient({ adapter })
 
-    // ค้นหาด่านที่ตรงกับ OS และ Level ที่ส่งมา
     const mission = await prisma.mission.findFirst({
-      where: { os: targetOs, level: targetLevel }
+      where: { os: targetOs, level: targetLevel },
+      select: {
+        id: true,
+        os: true,
+        difficulty: true,
+        level: true,
+        title: true,
+        description: true,
+        hint: true,
+        rewardExp: true
+        
+      }
     })
 
     if (mission) {
@@ -30,6 +42,55 @@ missionRoute.get('/:os/:level', async (c) => {
   } catch (error) {
     console.error("Get Mission Error:", error)
     return c.json({ success: false, message: "เซิร์ฟเวอร์มีปัญหา" }, 500)
+  }
+})
+
+// ==========================================
+// 🛡️ กฎ Zod สำหรับการส่งคำตอบมาตรวจ
+// ==========================================
+const verifySchema = z.object({
+  os: z.enum(['linux', 'windows']),
+  level: z.coerce.number().int().min(1),
+  userCommand: z.string().min(1) // สิ่งที่ผู้เล่นพิมพ์มา
+})
+
+// ==========================================
+// 🎯 API 2: ตรวจคำตอบ (Server-side Validation)
+// ==========================================
+missionRoute.post('/verify', 
+  zValidator('json', verifySchema, (result, c) => {
+    if (!result.success) return c.json({ success: false, message: 'ข้อมูลไม่ถูกต้อง' }, 400)
+  }),
+  async (c) => {
+  try {
+    const { os, level, userCommand } = c.req.valid('json')
+    
+    const adapter = new PrismaD1(c.env.DB)
+    const prisma = new PrismaClient({ adapter })
+
+    // ดึงเฉพาะเฉลยมาเช็คที่ฝั่ง Server (ไม่ต้องส่งกลับไปหา Client)
+    const mission = await prisma.mission.findFirst({
+      where: { os, level },
+      select: { expectedCommand: true } 
+    })
+
+    if (!mission) {
+      return c.json({ success: false, message: 'ไม่พบโจทย์ด่านนี้' }, 404)
+    }
+
+    // เทียบคำตอบที่ผู้เล่นพิมพ์ กับ เฉลยในระบบ
+    // (ใช้ .trim() ตัดช่องว่างหัวท้ายเผื่อผู้เล่นเผลอเคาะ spacebar)
+    const isCorrect = userCommand.trim() === mission.expectedCommand.trim()
+
+    return c.json({ 
+      success: true, 
+      isCorrect: isCorrect,
+      message: isCorrect ? 'คำสั่งถูกต้อง!' : 'คำสั่งยังไม่ถูก ลองใหม่อีกครั้ง'
+    })
+
+  } catch (error) {
+    console.error("Verify Command Error:", error)
+    return c.json({ success: false, message: 'เซิร์ฟเวอร์มีปัญหาตอนตรวจคำตอบ' }, 500)
   }
 })
 

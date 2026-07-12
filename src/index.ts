@@ -22,9 +22,8 @@ type Bindings = {
 }
 
 const app = new Hono<{ Bindings: Bindings }>()
-
 // ========================================================
-// 🛡️ CORE SECURITY LAYER (เรียงลำดับใหม่ให้เป๊ะ!)
+// 🛡️ CORE SECURITY LAYER
 // ========================================================
 
 // 🌟 1. ด่านแรก: เปิดประตูรับหน้าเว็บตัวเองก่อน
@@ -61,7 +60,17 @@ app.get('/api/mission/all', async (c) => {
     const adapter = new PrismaD1(c.env.DB)
     const prisma = new PrismaClient({ adapter })
     const missions = await prisma.mission.findMany({
-      orderBy: [{ os: 'asc' }, { level: 'asc' }]
+      orderBy: [{ os: 'asc' }, { level: 'asc' }],
+      select: {
+        id: true,
+        os: true,
+        difficulty: true,
+        level: true,
+        title: true,
+        description: true,
+        rewardExp: true
+        
+      }
     })
     return c.json({ success: true, data: missions })
   } catch (error) {
