@@ -82,11 +82,12 @@ missionRoute.post('/verify',
     // (ใช้ .trim() ตัดช่องว่างหัวท้ายเผื่อผู้เล่นเผลอเคาะ spacebar)
     const isCorrect = userCommand.trim() === mission.expectedCommand.trim()
 
-    return c.json({ 
-      success: true, 
-      isCorrect: isCorrect,
-      message: isCorrect ? 'คำสั่งถูกต้อง!' : 'คำสั่งยังไม่ถูก ลองใหม่อีกครั้ง'
-    })
+   return c.json({ 
+  success: true, 
+  isCorrect: isCorrect,
+  message: isCorrect ? 'คำสั่งถูกต้อง!' : 'คำสั่งยังไม่ถูก ลองใหม่อีกครั้ง',
+  correctAnswer: isCorrect ? mission.expectedCommand : undefined 
+})
 
   } catch (error) {
     console.error("Verify Command Error:", error)
