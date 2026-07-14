@@ -3,16 +3,34 @@ import { PrismaClient } from '@prisma/client'
 import { PrismaD1 } from '@prisma/adapter-d1'
 import type { D1Database } from '@cloudflare/workers-types'
 import { sign } from 'hono/jwt'
+import { setCookie, deleteCookie } from 'hono/cookie'
+import { authenticateToken } from '../middlewares/auth'
 import { z } from 'zod' // 🌟 1. Import Zod
 import { zValidator } from '@hono/zod-validator'
 
 
-type Bindings = { 
-  DB: D1Database; 
+type Bindings = {
+  DB: D1Database;
   JWT_SECRET: string;
-  GOOGLE_CLIENT_ID: string; 
+  GOOGLE_CLIENT_ID: string;
 }
-const authRoute = new Hono<{ Bindings: Bindings }>()
+type Variables = {
+  user: { userId: string; username: string; role: string; tokenVersion: number }
+}
+const authRoute = new Hono<{ Bindings: Bindings; Variables: Variables }>()
+
+// อายุ JWT 4 ชั่วโมง (เดิม 7 วัน)
+const TOKEN_TTL_SECONDS = 60 * 60 * 4
+
+// frontend (vercel.app) กับ backend (workers.dev) คนละโดเมนกัน จึงต้องใช้ SameSite=None + Secure
+const AUTH_COOKIE = 'auth_token'
+const CSRF_COOKIE = 'csrf_token'
+const cookieOpts = {
+  path: '/',
+  secure: true,
+  sameSite: 'None' as const,
+  maxAge: TOKEN_TTL_SECONDS,
+}
 
 // ==========================================
 // 🛡️ กฎ Zod สำหรับเช็คข้อมูลตอน Login
@@ -104,14 +122,19 @@ authRoute.post('/google',
       userId: user.id,
       username: user.username,
       role: user.role,
-      exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7, 
+      tokenVersion: user.tokenVersion,
+      exp: Math.floor(Date.now() / 1000) + TOKEN_TTL_SECONDS,
     }
     const token = await sign(payload, c.env.JWT_SECRET, 'HS256')
+
+    // JWT อยู่ใน HttpOnly cookie — JS ฝั่งหน้าเว็บอ่านไม่ได้ ป้องกัน XSS ขโมย token
+    setCookie(c, AUTH_COOKIE, token, { ...cookieOpts, httpOnly: true })
+    // CSRF token (double-submit): ไม่ HttpOnly เพื่อให้ frontend อ่านไปแนบเป็น header ได้
+    setCookie(c, CSRF_COOKIE, crypto.randomUUID(), { ...cookieOpts, httpOnly: false })
 
     return c.json({
       success: true,
       message: 'Google Login สำเร็จ!',
-      token: token,
       user: {
         id: user.id, username: user.username, role: user.role,
         displayName: user.displayName, avatar: user.avatar,
@@ -122,6 +145,29 @@ authRoute.post('/google',
 
   } catch (error) {
     console.error("Google Login Error:", error)
+    return c.json({ success: false, message: 'เกิดข้อผิดพลาดในระบบเซิร์ฟเวอร์' }, 500)
+  }
+})
+
+// ==========================================
+// 🚪 API: ออกจากระบบ — bump tokenVersion เพื่อ revoke ทุก token เก่า แล้วเคลียร์ cookie
+// ==========================================
+authRoute.post('/logout', authenticateToken, async (c) => {
+  try {
+    const user = c.get('user') as { userId: string }
+    const adapter = new PrismaD1(c.env.DB)
+    const prisma = new PrismaClient({ adapter })
+
+    await prisma.user.update({
+      where: { id: user.userId },
+      data: { tokenVersion: { increment: 1 } },
+    })
+
+    deleteCookie(c, AUTH_COOKIE, { path: '/', secure: true, sameSite: 'None' })
+    deleteCookie(c, CSRF_COOKIE, { path: '/', secure: true, sameSite: 'None' })
+    return c.json({ success: true, message: 'ออกจากระบบเรียบร้อย' })
+  } catch (error) {
+    console.error('Logout Error:', error)
     return c.json({ success: false, message: 'เกิดข้อผิดพลาดในระบบเซิร์ฟเวอร์' }, 500)
   }
 })

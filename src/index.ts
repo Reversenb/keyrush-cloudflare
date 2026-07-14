@@ -14,6 +14,7 @@ import docsRoute from './routes/docs'
 import adminDocsRoute from './routes/adminDocs'
 import seedRoute from './routes/seed' 
 import { rateLimiter } from './middlewares/rateLimit'
+import { csrfProtection } from './middlewares/csrf'
 
 type Bindings = {
   DB: D1Database
@@ -33,7 +34,7 @@ app.use('/api/*', cors({
     'https://keyrush-swart.vercel.app',   
   ],
   allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowHeaders: ['Content-Type', 'Authorization'],
+  allowHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token'],
   credentials: true,
 }))
 
@@ -48,6 +49,9 @@ app.use('*', async (c, next) => {
 
 // 🌟 3. ด่านสาม: ตรวจจับสแปม (Rate Limiter) ค่อยทำงานหลังจากใส่ CORS เสร็จแล้ว
 app.use('/api/*', rateLimiter)
+
+// 🌟 4. ด่านสี่: CSRF (double-submit cookie) สำหรับ POST/PUT/DELETE ที่ใช้ cookie auth
+app.use('/api/*', csrfProtection)
 
 // ========================================================
 

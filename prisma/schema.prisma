@@ -47,7 +47,8 @@ model User {
   avatar           String?   @default("Felix")
   bio              String?
   role             String    @default("user")
-  adminFavorites   String    @default("[]") 
+  adminFavorites   String    @default("[]")
+  tokenVersion     Int       @default(0)
   linuxLevel       Int       @default(1)
   linuxExp         Int       @default(0)
   windowsLevel     Int       @default(1)
