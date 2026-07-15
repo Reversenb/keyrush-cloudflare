@@ -190,6 +190,7 @@ userRoute.put('/progress',
 
     const isReplaying = playedMissionLevel < currentLevel
     let updatedUser = null
+    let earnedExp = 0
 
     // 3. ถ้าเล่นด่านใหม่ ให้แจก EXP และอัปเลเวล
     if (!isReplaying) {
@@ -199,8 +200,17 @@ userRoute.put('/progress',
 
       if (!missionData) return c.json({ success: false, message: 'ไม่พบข้อมูลภารกิจในระบบ' }, 404)
 
-      const newExp = currentExp + missionData.rewardExp
-      const newLevel = currentLevel + 1 
+      // 💡 เคยกดดูเฉลยด่านนี้ → ได้ EXP แค่ 20% (server เป็นคนจดตอนกดเฉลย โกงไม่ได้)
+      const revealRecord = await prisma.progress.findUnique({
+        where: { userId_missionId: { userId: authUser.userId, missionId: missionData.id } },
+        select: { usedReveal: true }
+      })
+      earnedExp = revealRecord?.usedReveal
+        ? Math.floor(missionData.rewardExp * 0.2)
+        : missionData.rewardExp
+
+      const newExp = currentExp + earnedExp
+      const newLevel = currentLevel + 1
 
       const updateData = os === 'windows'
         ? { windowsLevel: newLevel, windowsExp: newExp }
@@ -228,7 +238,7 @@ userRoute.put('/progress',
     }
 
     const responseMessage = isReplaying ? 'บันทึกสถิติสำเร็จ! (ทบทวนด่านเก่า ไม่ได้รับ EXP เพิ่ม)' : 'บันทึกข้อมูลและรับ EXP สำเร็จ!'
-    return c.json({ success: true, message: responseMessage, data: updatedUser })
+    return c.json({ success: true, message: responseMessage, earnedExp, data: updatedUser })
 
   } catch (error) {
     console.error("Save Progress Error:", error)

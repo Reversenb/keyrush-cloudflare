@@ -29,8 +29,9 @@ model Progress {
   isPassed   Boolean   @default(false)
   errorCount Int       @default(0) 
   wpm        Int       @default(0) 
-  accuracy   Int       @default(0) 
-  passedAt   DateTime? 
+  accuracy   Int       @default(0)
+  usedReveal Boolean   @default(false)
+  passedAt   DateTime?
   userId     String
   missionId  String
   Mission    Mission   @relation(fields: [missionId], references: [id], onDelete: Cascade)
