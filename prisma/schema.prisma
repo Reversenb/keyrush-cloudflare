@@ -62,10 +62,11 @@ model User {
 model PlayHistory {
   id        String   @id @default(uuid())
   userId    String
-  os        String   
-  level     Int      
-  wpm       Int      
-  accuracy  Int      
+  os        String
+  level     Int
+  wpm       Int
+  accuracy  Int
+  earnedExp Int?     // EXP ที่ได้จริงรอบนั้น (หลังหักโทษเฉลย, 0 = รอบเล่นซ้ำ, null = record เก่าก่อนมี field นี้)
   createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
