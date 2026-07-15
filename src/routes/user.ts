@@ -3,6 +3,7 @@ import { PrismaClient } from '@prisma/client'
 import { PrismaD1 } from '@prisma/adapter-d1'
 import type { D1Database } from '@cloudflare/workers-types'
 import { authenticateToken } from '../middlewares/auth'
+import { verify } from 'hono/jwt'
 import { z } from 'zod'
 import { zValidator } from '@hono/zod-validator'
 
@@ -149,7 +150,9 @@ const progressSchema = z.object({
   os: z.enum(['linux', 'windows'], { message: 'ระบบขัดข้อง: OS ไม่ถูกต้อง' }),
   level: z.coerce.number().int().min(1).max(100, { message: 'Level ผิดปกติ' }),
   wpm: z.coerce.number().int().min(0).max(300).optional(),
-  accuracy: z.coerce.number().int().min(0).max(100).optional()
+  accuracy: z.coerce.number().int().min(0).max(100).optional(),
+  // ตั๋วผ่านด่านที่ได้จาก /mission/verify — เป็นหลักฐานว่าเล่นผ่านจริง (กันฟาร์ม EXP)
+  clearanceToken: z.string().min(1, { message: 'ขาดหลักฐานการผ่านด่าน' })
 })
 
 // ==========================================
@@ -167,7 +170,24 @@ userRoute.put('/progress',
   try {
     const authUser = c.get('user')
     // 🌟 ดึงข้อมูลจาก valid('json') แทน await c.req.json() เพื่อให้ได้ข้อมูลที่ปลอดภัย 100%
-    const { os, level: playedMissionLevel, wpm, accuracy } = c.req.valid('json') 
+    const { os, level: playedMissionLevel, wpm, accuracy, clearanceToken } = c.req.valid('json')
+
+    // 🎫 ตรวจตั๋วผ่านด่าน: ต้องมาจาก /mission/verify ที่ตอบถูกจริงเท่านั้น
+    // ปิดช่องฟาร์ม EXP ด้วยการยิง endpoint นี้ตรงๆ โดยไม่เล่นเกม
+    let clearance: any
+    try {
+      clearance = await verify(clearanceToken, c.env.JWT_SECRET as string, 'HS256')
+    } catch {
+      return c.json({ success: false, message: 'หลักฐานการผ่านด่านหมดอายุหรือไม่ถูกต้อง' }, 403)
+    }
+    if (
+      clearance.purpose !== 'clearance' ||
+      clearance.userId !== authUser.userId ||
+      clearance.os !== os ||
+      clearance.level !== playedMissionLevel
+    ) {
+      return c.json({ success: false, message: 'หลักฐานการผ่านด่านไม่ตรงกับด่านที่ส่งมา' }, 403)
+    }
 
     const adapter = new PrismaD1(c.env.DB)
     const prisma = new PrismaClient({ adapter })
