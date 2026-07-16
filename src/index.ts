@@ -27,7 +27,7 @@ const app = new Hono<{ Bindings: Bindings }>()
 // 🛡️ CORE SECURITY LAYER
 // ========================================================
 
-// 🌟 1. ด่านแรก: เปิดประตูรับหน้าเว็บตัวเองก่อน
+
 app.use('/api/*', cors({
   origin: [
     'http://localhost:3000', 
