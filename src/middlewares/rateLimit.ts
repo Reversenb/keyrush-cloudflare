@@ -8,13 +8,17 @@ const requestCounts = new Map<string, { count: number; resetTime: number }>()
 export const rateLimiter = async (c: Context, next: Next) => {
   // 1. ดึง IP ของคนที่ยิง API มา (Cloudflare จะแนบมาใน Header นี้เสมอ)
   const ip = c.req.header('cf-connecting-ip') || 'unknown-ip'
-  
+
   // ⚙️ ตั้งค่าความเข้มงวด
-  const LIMIT = 30 // ห้ามยิงเกิน 30 ครั้ง
+  // /api/survival/answer ถูกยิงทุกข้อระหว่างเล่น (คนเก่งๆ ~20 ครั้ง/นาที) เลยแยกสมุดจด
+  // และให้โควต้าสูงกว่า — จะได้ไม่ไปเบียดโควต้า request ปกติของผู้เล่น
+  const isSurvivalAnswer = c.req.path === '/api/survival/answer'
+  const LIMIT = isSurvivalAnswer ? 90 : 30 // ห้ามยิงเกินโควต้านี้
   const WINDOW_MS = 60 * 1000 // ในระยะเวลา 1 นาที (60,000 มิลลิวินาที)
+  const bucketKey = isSurvivalAnswer ? `${ip}:survival-answer` : ip
 
   const now = Date.now()
-  let record = requestCounts.get(ip)
+  let record = requestCounts.get(bucketKey)
 
   // 2. ถ้าเพิ่งเคยยิงมาครั้งแรก หรือประวัติเก่าหมดอายุไปแล้ว (เกิน 1 นาที) ให้เริ่มจดใหม่
   if (!record || now > record.resetTime) {
@@ -25,7 +29,7 @@ export const rateLimiter = async (c: Context, next: Next) => {
   }
 
   // เซฟประวัติกลับลงสมุดจด
-  requestCounts.set(ip, record)
+  requestCounts.set(bucketKey, record)
 
   // 🚨 4. เช็คว่าแต้มสแปมเกินที่กำหนดไหม
   if (record.count > LIMIT) {
