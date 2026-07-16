@@ -65,12 +65,9 @@ authRoute.post('/google',
     const tokenInfo: any = await tokenInfoRes.json()
 
    if (tokenInfo.aud !== c.env.GOOGLE_CLIENT_ID) {
-      return c.json({ 
-        success: false, 
-        message: 'Access Denied: Token ไม่ได้เป็นของระบบ KeyRush',
-        
-       
-        debug_got_from_google: tokenInfo.aud 
+      return c.json({
+        success: false,
+        message: 'Access Denied: Token ไม่ได้เป็นของระบบ KeyRush'
       }, 403)
     }
 

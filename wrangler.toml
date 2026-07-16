@@ -1,9 +1,0 @@
-name = "keyrush-api"
-main = "src/index.ts"
-compatibility_date = "2026-06-30"
-
-# กำหนดสิทธิ์ให้โค้ดเรียกใช้งาน Database
-[[d1_databases]]
-binding = "DB"
-database_name = "keyrush-db"
-database_id = "7bbc94d0-dbbc-4e6f-8e05-a5877eb97faa"
