@@ -143,6 +143,28 @@ userRoute.get('/stats', async (c) => {
 })
 
 // ==========================================
+// 🚀 API 4.5: ดึงประวัติการเล่นทั้งหมด (สำหรับหน้า History — ไม่ตัดเหลือ 5 รายการแบบ /stats)
+// ==========================================
+userRoute.get('/history', async (c) => {
+  try {
+    const authUser = c.get('user')
+    const adapter = new PrismaD1(c.env.DB)
+    const prisma = new PrismaClient({ adapter })
+
+    const history = await prisma.playHistory.findMany({
+      where: { userId: authUser.userId },
+      orderBy: { createdAt: 'desc' },
+      take: 500 // กันข้อมูลบวมเกินจำเป็น — ครอบคลุมการเล่นหลายเดือน
+    })
+
+    return c.json({ success: true, data: history })
+  } catch (error) {
+    console.error('Get History Error:', error)
+    return c.json({ success: false, message: 'ดึงประวัติไม่สำเร็จ' }, 500)
+  }
+})
+
+// ==========================================
 // 🛡️ กฎ Zod สำหรับเช็คข้อมูลตอนบันทึกเซฟเกม
 // ==========================================
 const progressSchema = z.object({
