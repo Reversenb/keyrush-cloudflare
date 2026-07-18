@@ -26,11 +26,11 @@ export interface ShopItem {
 export const SHOP_ITEMS: ShopItem[] = [
   // ===== 🏷️ ฉายา (โชว์ข้างชื่อบน Leaderboard / โปรไฟล์) =====
   { id: 'title_rome', type: 'title', name: 'กรุงโรม', desc: 'กรุงโรมสร้างเสร็จภายในวันเดียว', price: 50, label: 'กรุงโรมสร้างเสร็จภายในวันเดียว' },
-  { id: 'title_blacksmith', type: 'title', name: 'นักบิด', desc: 'ฉายาสำหรับสายขี้เกียจ', price: 50, label: 'นักบิด' },
-  { id: 'title_blacksmith', type: 'title', name: 'นอนน้อยแต่นอนนะ', desc: 'ฉายาสำหรับสายโต้รุ่ง', price: 50, label: 'นอนน้อยแต่นอนนะ' },
-  { id: 'title_blacksmith', type: 'title', name: 'พร้อมลั่น', desc: 'ฉายาสำหรับสายลุย', price: 100, label: 'พร้อมลั่น' },
-  { id: 'title_blacksmith', type: 'title', name: 'ศุกร์เหงา', desc: 'ฉายาสำหรับไม่รู้จะทำอะไรเพราะพรุ่งนี้หยุด', price: 100, label: 'ศุกร์เหงา' },
-  { id: 'title_rome', type: 'title', name: 'ทาสแมว', desc: 'ฉายาสำหรับคนที่รักแมว', price: 50, label: 'ทาสแมว' },
+  { id: 'title_bid', type: 'title', name: 'นักบิด', desc: 'ฉายาสำหรับสายขี้เกียจ', price: 50, label: 'นักบิด' },
+  { id: 'title_sleepless', type: 'title', name: 'นอนน้อยแต่นอนนะ', desc: 'ฉายาสำหรับสายโต้รุ่ง', price: 50, label: 'นอนน้อยแต่นอนนะ' },
+  { id: 'title_ready', type: 'title', name: 'พร้อมลั่น', desc: 'ฉายาสำหรับสายลุย', price: 100, label: 'พร้อมลั่น' },
+  { id: 'title_friday', type: 'title', name: 'ศุกร์เหงา', desc: 'ฉายาสำหรับไม่รู้จะทำอะไรเพราะพรุ่งนี้หยุด', price: 100, label: 'ศุกร์เหงา' },
+  { id: 'title_cat_servant', type: 'title', name: 'ทาสแมว', desc: 'ฉายาสำหรับคนที่รักแมว', price: 50, label: 'ทาสแมว' },
   { id: 'title_newbie', type: 'title', name: 'มือใหม่ไฟแรง', desc: 'ฉายาสำหรับผู้เริ่มต้นที่ไฟแรงที่สุด', price: 100, label: 'มือใหม่ไฟแรง' },
   { id: 'title_speedster', type: 'title', name: 'สายซิ่ง', desc: 'สำหรับคนที่นิ้วไวกว่าความคิด', price: 300, label: 'สายซิ่ง' },
   { id: 'title_perfectionist', type: 'title', name: 'จอมเป๊ะ', desc: 'พิมพ์ผิดไม่มีในสารบบ', price: 300, label: 'จอมเป๊ะ' },
