@@ -63,19 +63,19 @@ export const SHOP_ITEMS: ShopItem[] = [
   },
 
   // ===== 🖱️ เอฟเฟกต์เมาส์ (เทรลตามเมาส์ — ค่าเริ่มต้นไม่มีเอฟเฟกต์ ต้องซื้อ) =====
-  { id: 'cursor_stars', type: 'cursor', cursorId: 'stars', emoji: '⭐', name: 'Star Sparkle', desc: 'ดาวประกายเปลี่ยนสีตามธีมเว็บ คลาสสิกสุดๆ', price: 500 },
-  { id: 'cursor_hearts', type: 'cursor', cursorId: 'hearts', emoji: '💗', name: 'Sweet Hearts', desc: 'หัวใจชมพูลอยฟุ้งตามเมาส์ หวานสุดๆ', price: 700 },
-  { id: 'cursor_bubbles', type: 'cursor', cursorId: 'bubbles', emoji: '🫧', name: 'Bubble Pop', desc: 'ฟองสบู่ใสๆ ลอยขึ้นเบาๆ สบายตา', price: 700 },
-  { id: 'cursor_fire', type: 'cursor', cursorId: 'fire', emoji: '🔥', name: 'Flame Trail', desc: 'เปลวไฟลุกโชนตามทุกการขยับ ร้อนแรง', price: 1000 },
-  { id: 'cursor_snow', type: 'cursor', cursorId: 'snow', emoji: '❄️', name: 'Snowfall', desc: 'เกล็ดหิมะโปรยปรายเย็นฉ่ำตามเมาส์', price: 1000 },
+  { id: 'cursor_stars', type: 'cursor', cursorId: 'stars', emoji: '⭐', name: 'Star', desc: 'ดาวประกาย', price: 500 },
+  { id: 'cursor_hearts', type: 'cursor', cursorId: 'hearts', emoji: '💗', name: 'Sweet Hearts', desc: 'หัวใจชมพู', price: 700 },
+  { id: 'cursor_bubbles', type: 'cursor', cursorId: 'bubbles', emoji: '🫧', name: 'Bubble Pop', desc: 'ฟองสบู่ใสๆ', price: 700 },
+  { id: 'cursor_fire', type: 'cursor', cursorId: 'fire', emoji: '🔥', name: 'Flame Trail', desc: 'เปลวไฟลุกโชน', price: 1000 },
+  { id: 'cursor_snow', type: 'cursor', cursorId: 'snow', emoji: '❄️', name: 'Snowfall', desc: 'เกล็ดหิมะ', price: 1000 },
 
   // ระดับพรีเมียม — สวยขึ้น แพงขึ้นตามลำดับ
   { id: 'cursor_butterfly', type: 'cursor', cursorId: 'butterfly', emoji: '🦋', name: 'Butterfly Garden', desc: 'ผีเสื้อโบยบินท่ามกลางดอกไม้บานตามเมาส์', price: 1500 },
-  { id: 'cursor_thunder', type: 'cursor', cursorId: 'thunder', emoji: '⚡', name: 'Thunder Strike', desc: 'สายฟ้าฟาดเปรี้ยงทุกการเคลื่อนไหว เร็วแรงทะลุจอ', price: 2000 },
-  { id: 'cursor_rainbow', type: 'cursor', cursorId: 'rainbow', emoji: '🌈', name: 'Rainbow Magic', desc: 'สายรุ้งพร้อมดาวระยิบระยับ สดใสทุกองศา', price: 2500 },
-  { id: 'cursor_galaxy', type: 'cursor', cursorId: 'galaxy', emoji: '🪐', name: 'Galaxy Dust', desc: 'ฝุ่นกาแล็กซี่ ดาวเสาร์ และแสงดาวลอยล่องในอวกาศ', price: 3500 },
-  { id: 'cursor_royal', type: 'cursor', cursorId: 'royal', emoji: '👑', name: 'Royal Aura', desc: 'มงกุฎและเพชรพลอยประกายทอง สมศักดิ์ศรีราชา', price: 5000 },
-  { id: 'cursor_dragon', type: 'cursor', cursorId: 'dragonsoul', emoji: '🐉', name: 'Dragon Soul', desc: 'วิญญาณมังกรพ่นไฟคำราม — เอฟเฟกต์ระดับตำนาน', price: 8000 },
+  { id: 'cursor_thunder', type: 'cursor', cursorId: 'thunder', emoji: '⚡', name: 'Thunder Strike', desc: 'สายฟ้า', price: 2000 },
+  { id: 'cursor_rainbow', type: 'cursor', cursorId: 'rainbow', emoji: '🌈', name: 'Rainbow Magic', desc: 'สายรุ้ง', price: 2500 },
+  { id: 'cursor_galaxy', type: 'cursor', cursorId: 'galaxy', emoji: '🪐', name: 'Galaxy Dust', desc: 'กาแล็กซี่ ดาวเสาร์', price: 3500 },
+  { id: 'cursor_royal', type: 'cursor', cursorId: 'royal', emoji: '👑', name: 'Royal Aura', desc: 'มงกุฎ', price: 5000 },
+  { id: 'cursor_dragon', type: 'cursor', cursorId: 'dragonsoul', emoji: '🐉', name: 'Dragon Soul', desc: 'วิญญาณมังกร', price: 8000 },
 ]
 
 // หาสินค้าจาก id (ใช้ตอนซื้อ/ใส่ของ)
