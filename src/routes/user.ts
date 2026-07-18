@@ -302,7 +302,8 @@ userRoute.put('/progress',
           level: playedMissionLevel,
           wpm: wpm,
           accuracy: accuracy,
-          earnedExp: earnedExp // ค่าเดียวกับที่ตอบใน response (0 ถ้าเป็นรอบเล่นซ้ำ)
+          earnedExp: earnedExp, // ค่าเดียวกับที่ตอบใน response (0 ถ้าเป็นรอบเล่นซ้ำ)
+          earnedCoins: earnedCoins
         }
       })
     }

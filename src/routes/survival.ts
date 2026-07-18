@@ -323,7 +323,8 @@ survivalRoute.post('/submit',
           level: SURVIVAL_HISTORY_LEVEL,
           wpm: finalWpm,
           accuracy: finalAccuracy,
-          earnedExp
+          earnedExp,
+          earnedCoins
         }
       })
 
