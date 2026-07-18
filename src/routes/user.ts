@@ -6,8 +6,12 @@ import { authenticateToken } from '../middlewares/auth'
 import { verify } from 'hono/jwt'
 import { z } from 'zod'
 import { zValidator } from '@hono/zod-validator'
+import { findItem } from '../shop/items'
 
 // 🌟 ผูก Type ให้ TypeScript รู้จักตัวแปร Environment และ Variables (ข้อมูล user จาก Token)
+// 🪙 เหรียญที่ได้ต่อการผ่านด่านใหม่ 1 ด่าน (ใช้ซื้อของในร้าน)
+const COINS_PER_MISSION = 10
+
 type Bindings = { DB: D1Database; JWT_SECRET: string }
 type Variables = { user: { userId: string; username: string; role: string } }
 
@@ -31,12 +35,15 @@ userRoute.get('/profile/public/:username', async (c) => {
       },
       select: {
         id: true, username: true, displayName: true, avatar: true, bio: true, role: true,
-        linuxLevel: true, linuxExp: true, windowsLevel: true, windowsExp: true, createdAt: true
+        linuxLevel: true, linuxExp: true, windowsLevel: true, windowsExp: true,
+        equippedTitle: true, createdAt: true
       }
     })
 
     if (!user) return c.json({ success: false, message: 'ไม่พบผู้ใช้นี้ในระบบ' }, 404)
-    return c.json({ success: true, data: user })
+    // 🏷️ แปลง itemId ฉายา → ข้อความที่โชว์ (แคตตาล็อกอยู่ฝั่ง server ที่เดียว)
+    const title = user.equippedTitle ? (findItem(user.equippedTitle)?.label ?? null) : null
+    return c.json({ success: true, data: { ...user, title } })
   } catch (error) {
     return c.json({ success: false, message: 'เซิร์ฟเวอร์มีปัญหา' }, 500)
   }
@@ -59,6 +66,7 @@ userRoute.get('/progress', async (c) => {
       select: {
         id: true, username: true, displayName: true, avatar: true, bio: true, role: true,
         linuxLevel: true, linuxExp: true, windowsLevel: true, windowsExp: true,
+        coins: true, equippedTitle: true, equippedTheme: true, equippedCursor: true,
         adminFavorites: true, createdAt: true
       }
     })
@@ -69,7 +77,22 @@ userRoute.get('/progress', async (c) => {
     let favoriteMissions = []
     try { favoriteMissions = JSON.parse(user.adminFavorites) } catch (e) {}
 
-    return c.json({ success: true, data: { ...user, favoriteMissions } })
+    // 🛍️ แปลงของที่ใส่อยู่ให้พร้อมใช้: ฉายา → ข้อความ, ธีม → ชื่อคลาสธีม
+    const title = user.equippedTitle ? (findItem(user.equippedTitle)?.label ?? null) : null
+    const activeTheme = user.equippedTheme ? (findItem(user.equippedTheme)?.themeId ?? null) : null
+    const activeCursor = user.equippedCursor ? (findItem(user.equippedCursor)?.cursorId ?? null) : null
+
+    // รายชื่อธีมที่ผู้เล่นเป็นเจ้าของ — Navbar ใช้ตัดสินว่าจะให้สลับไปธีมไหนได้บ้าง
+    const ownedItems = await prisma.userItem.findMany({
+      where: { userId: authUser.userId },
+      select: { itemId: true }
+    })
+    const ownedThemes = ownedItems
+      .map((o) => findItem(o.itemId))
+      .filter((i) => i?.type === 'theme' && i.themeId)
+      .map((i) => i!.themeId as string)
+
+    return c.json({ success: true, data: { ...user, favoriteMissions, title, activeTheme, activeCursor, ownedThemes } })
   } catch (error) {
     return c.json({ success: false, message: 'เซิร์ฟเวอร์มีปัญหา' }, 500)
   }
@@ -233,6 +256,7 @@ userRoute.put('/progress',
     const isReplaying = playedMissionLevel < currentLevel
     let updatedUser = null
     let earnedExp = 0
+    let earnedCoins = 0
 
     // 3. ถ้าเล่นด่านใหม่ ให้แจก EXP และอัปเลเวล
     if (!isReplaying) {
@@ -254,9 +278,12 @@ userRoute.put('/progress',
       const newExp = currentExp + earnedExp
       const newLevel = currentLevel + 1
 
+      // 🪙 แจกเหรียญร้านค้า — เฉพาะรอบที่ผ่านด่านใหม่จริง (มี clearanceToken ยืนยันแล้ว)
+      earnedCoins = COINS_PER_MISSION
+
       const updateData = os === 'windows'
-        ? { windowsLevel: newLevel, windowsExp: newExp }
-        : { linuxLevel: newLevel, linuxExp: newExp }
+        ? { windowsLevel: newLevel, windowsExp: newExp, coins: { increment: earnedCoins } }
+        : { linuxLevel: newLevel, linuxExp: newExp, coins: { increment: earnedCoins } }
 
       updatedUser = await prisma.user.update({
         where: { id: authUser.userId },
@@ -281,7 +308,7 @@ userRoute.put('/progress',
     }
 
     const responseMessage = isReplaying ? 'บันทึกสถิติสำเร็จ! (ทบทวนด่านเก่า ไม่ได้รับ EXP เพิ่ม)' : 'บันทึกข้อมูลและรับ EXP สำเร็จ!'
-    return c.json({ success: true, message: responseMessage, earnedExp, data: updatedUser })
+    return c.json({ success: true, message: responseMessage, earnedExp, earnedCoins, data: updatedUser })
 
   } catch (error) {
     console.error("Save Progress Error:", error)

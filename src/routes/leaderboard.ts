@@ -2,6 +2,7 @@ import { Hono } from 'hono'
 import { PrismaClient } from '@prisma/client'
 import { PrismaD1 } from '@prisma/adapter-d1'
 import type { D1Database } from '@cloudflare/workers-types'
+import { findItem } from '../shop/items'
 
 // 🌟 ผูก Type ให้ TypeScript รู้จักตัวแปร DB
 type Bindings = { DB: D1Database }
@@ -24,14 +25,14 @@ leaderboardRoute.get('/:os', async (c) => {
         where: { windowsExp: { gt: 0 } }, 
         orderBy: { windowsExp: 'desc' }, 
         take: 50,
-        select: { id: true, username: true, displayName: true, avatar: true, windowsLevel: true, windowsExp: true }
+        select: { id: true, username: true, displayName: true, avatar: true, equippedTitle: true, windowsLevel: true, windowsExp: true }
       })
     } 
     // 🌍 บอร์ดจัดอันดับรวม (เอาคะแนน Linux + Windows มาบวกกัน)
     else if (os === 'combined') {
       const allUsers = await prisma.user.findMany({
         where: { OR: [{ linuxExp: { gt: 0 } }, { windowsExp: { gt: 0 } }] },
-        select: { id: true, username: true, displayName: true, avatar: true, linuxLevel: true, linuxExp: true, windowsLevel: true, windowsExp: true }
+        select: { id: true, username: true, displayName: true, avatar: true, equippedTitle: true, linuxLevel: true, linuxExp: true, windowsLevel: true, windowsExp: true }
       })
       // เรียงลำดับด้วย JavaScript (เพราะรวม 2 คอลัมน์)
       topUsers = allUsers
@@ -44,11 +45,17 @@ leaderboardRoute.get('/:os', async (c) => {
         where: { linuxExp: { gt: 0 } }, 
         orderBy: { linuxExp: 'desc' }, 
         take: 50,
-        select: { id: true, username: true, displayName: true, avatar: true, linuxLevel: true, linuxExp: true }
+        select: { id: true, username: true, displayName: true, avatar: true, equippedTitle: true, linuxLevel: true, linuxExp: true }
       })
     }
 
-    return c.json({ success: true, data: topUsers })
+    // ??? ???? itemId ??????? ? ???????????????? (????????????????? server ????????)
+    const withTitles = topUsers.map((u: any) => ({
+      ...u,
+      title: u.equippedTitle ? (findItem(u.equippedTitle)?.label ?? null) : null
+    }))
+
+    return c.json({ success: true, data: withTitles })
 
   } catch (error) {
     console.error("Leaderboard Error:", error)

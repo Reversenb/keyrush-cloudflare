@@ -12,6 +12,7 @@ import missionRoute from './routes/mission'
 import adminRoute from './routes/admin'
 import docsRoute from './routes/docs'
 import survivalRoute from './routes/survival'
+import shopRoute from './routes/shop'
 import adminDocsRoute from './routes/adminDocs'
 import seedRoute from './routes/seed' 
 import { rateLimiter } from './middlewares/rateLimit'
@@ -92,6 +93,7 @@ app.route('/api/mission', missionRoute)
 app.route('/api/admin', adminRoute)
 app.route('/api/docs', docsRoute)
 app.route('/api/survival', survivalRoute)
+app.route('/api/shop', shopRoute)
 app.route('/api/admin/docs', adminDocsRoute)
 
 app.route('/api/seed', seedRoute) 

@@ -41,9 +41,9 @@ model Progress {
 
 model User {
   id               String    @id @default(uuid())
-  username         String    @unique  
+  username         String    @unique
   email            String?   @unique
-  googleId         String?   @unique 
+  googleId         String?   @unique
   displayName      String?
   avatar           String?   @default("Felix")
   bio              String?
@@ -54,9 +54,28 @@ model User {
   linuxExp         Int       @default(0)
   windowsLevel     Int       @default(1)
   windowsExp       Int       @default(0)
+  // 🪙 ระบบร้านค้า — เหรียญได้จากการเล่นเท่านั้น (server แจกในจุดที่ตรวจแล้ว)
+  coins            Int       @default(0)
+  equippedTitle    String?   // itemId ของฉายาที่ใส่อยู่
+  equippedTerminal String?   // (เลิกใช้แล้ว) ชุดสี terminal เดิม
+  equippedTheme    String?   // itemId ของธีมเว็บที่ใส่อยู่
+  equippedCursor   String?   // itemId ของเอฟเฟกต์เมาส์ที่ใส่อยู่
   createdAt        DateTime  @default(now())
   Progress         Progress[]
   playHistories    PlayHistory[]
+  items            UserItem[]
+}
+
+// ==========================================
+// 🛍️ ของที่ผู้เล่นซื้อไว้ (แคตตาล็อกอยู่ใน src/shop/items.ts ฝั่ง server)
+// ==========================================
+model UserItem {
+  id        String   @id @default(uuid())
+  userId    String
+  itemId    String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@unique([userId, itemId])
 }
 
 model PlayHistory {

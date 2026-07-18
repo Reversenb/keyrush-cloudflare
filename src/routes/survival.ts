@@ -19,6 +19,7 @@ const survivalRoute = new Hono<{ Bindings: Bindings; Variables: Variables }>()
 // ==========================================
 const SURVIVAL_TTL_SEC = 60 * 30      // ตั๋วเกมอยู่ได้ 30 นาที (เกมจริงยาวสุดไม่กี่นาที)
 const EXP_PER_CLEAR = 5               // พิมพ์ถูก 1 ข้อ = 5 EXP (ตรงกับที่ frontend โชว์) ไม่มีเพดานต่อเกม
+const COINS_PER_CLEAR = 1             // 🪙 พิมพ์ถูก 1 ข้อ = 1 เหรียญ (ใช้ซื้อของในร้าน)
 const MAX_HUMAN_WPM = 400             // เพดานความเร็วพิมพ์ของมนุษย์ เกินนี้ = บอท
 const MEMORIZE_MS = 2000              // frontend บังคับเฟส "จำก่อนพิมพ์" ข้อละ 2 วิ
 const BASE_DURATION_SEC = 60          // เวลาเริ่มต้นของเกม
@@ -273,8 +274,9 @@ survivalRoute.post('/submit',
         return c.json({ success: false, message: 'คะแนนรอบนี้ถูกบันทึกไปแล้ว' }, 409)
       }
 
-      // 🧮 EXP ฝั่ง server เท่านั้น — ข้อละ 5 จากแต้มที่ server นับเอง
+      // 🧮 EXP + เหรียญ ฝั่ง server เท่านั้น — คิดจากแต้มที่ server นับเอง
       const earnedExp = cleared * EXP_PER_CLEAR
+      const earnedCoins = cleared * COINS_PER_CLEAR
 
       // 📊 สถิติ: server รู้ว่าข้อที่ผ่านคือคำสั่งไหนบ้าง → คำนวณเพดาน WPM เองได้
       const questions = await loadQuestions(prisma, os, Number(session.seed))
@@ -308,8 +310,8 @@ survivalRoute.post('/submit',
         await prisma.user.update({
           where: { id: authUser.userId },
           data: os === 'windows'
-            ? { windowsExp: currentUser.windowsExp + earnedExp }
-            : { linuxExp: currentUser.linuxExp + earnedExp }
+            ? { windowsExp: currentUser.windowsExp + earnedExp, coins: { increment: earnedCoins } }
+            : { linuxExp: currentUser.linuxExp + earnedExp, coins: { increment: earnedCoins } }
         })
       }
 
@@ -329,6 +331,7 @@ survivalRoute.post('/submit',
         success: true,
         message: earnedExp > 0 ? 'บันทึกคะแนนสำเร็จ!' : 'บันทึกรอบเล่นสำเร็จ (ไม่ได้รับ EXP)',
         earnedExp,
+        earnedCoins,
         clearedCount: cleared,
         // ค่าที่บันทึกลง History จริง — ให้ frontend โชว์ชุดเดียวกันจะได้ตรงกันทุกหน้า
         wpm: finalWpm,
