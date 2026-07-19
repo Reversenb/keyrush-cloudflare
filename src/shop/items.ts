@@ -26,6 +26,7 @@ export interface ShopItem {
 export const SHOP_ITEMS: ShopItem[] = [
   // ===== 🏷️ ฉายา (โชว์ข้างชื่อบน Leaderboard / โปรไฟล์) =====
   { id: 'title_rome', type: 'title', name: 'กรุงโรม', desc: 'กรุงโรมสร้างเสร็จภายในวันเดียว', price: 50, label: 'กรุงโรมสร้างเสร็จภายในวันเดียว' },
+  { id: 'title_ai', type: 'title', name: 'Ai ร่างมนุษย์', desc: 'ฉายาสำหรับคนที่ชอบ AI', price: 100, label: 'Ai ร่างมนุษย์' },
   { id: 'title_bid', type: 'title', name: 'นักบิด', desc: 'ฉายาสำหรับสายขี้เกียจ', price: 50, label: 'นักบิด' },
   { id: 'title_sleepless', type: 'title', name: 'นอนน้อยแต่นอนนะ', desc: 'ฉายาสำหรับสายโต้รุ่ง', price: 50, label: 'นอนน้อยแต่นอนนะ' },
   { id: 'title_ready', type: 'title', name: 'พร้อมลั่น', desc: 'ฉายาสำหรับสายลุย', price: 100, label: 'พร้อมลั่น' },
@@ -61,6 +62,16 @@ export const SHOP_ITEMS: ShopItem[] = [
     name: 'Red Dragon', desc: 'ธีมมืดแดงเพลิง ดุดันสายโหด สำหรับนักล่าตัวจริง',
     price: 2500, preview: ['#1a0505', '#ef4444', '#fca5a5']
   },
+  {
+    id: 'theme_sky', type: 'theme', themeId: 'sky',
+    name: 'Sky Blue', desc: 'ธีมฟ้าพาสเทลใสสบายตา',
+    price: 1500, preview: ['#f0f9ff', '#0ea5e9', '#7dd3fc']
+  },
+  {
+    id: 'theme_mint', type: 'theme', themeId: 'mint',
+    name: 'Mint', desc: 'ธีมเขียวมิ้นพาสเทล สดชื่นเย็นตา',
+    price: 1000, preview: ['#ecfdf5', '#10b981', '#6ee7b7']
+  },
 
   // ===== 🖱️ เอฟเฟกต์เมาส์ (เทรลตามเมาส์ — ค่าเริ่มต้นไม่มีเอฟเฟกต์ ต้องซื้อ) =====
   { id: 'cursor_stars', type: 'cursor', cursorId: 'stars', emoji: '⭐', name: 'Star', desc: 'ดาวประกาย', price: 500 },
@@ -68,6 +79,7 @@ export const SHOP_ITEMS: ShopItem[] = [
   { id: 'cursor_bubbles', type: 'cursor', cursorId: 'bubbles', emoji: '🫧', name: 'Bubble Pop', desc: 'ฟองสบู่ใสๆ', price: 700 },
   { id: 'cursor_fire', type: 'cursor', cursorId: 'fire', emoji: '🔥', name: 'Flame Trail', desc: 'เปลวไฟลุกโชน', price: 1000 },
   { id: 'cursor_snow', type: 'cursor', cursorId: 'snow', emoji: '❄️', name: 'Snowfall', desc: 'เกล็ดหิมะ', price: 1000 },
+  { id: 'cursor_leaves', type: 'cursor', cursorId: 'leaves', emoji: '🍃', name: 'Leaf Breeze', desc: 'ใบไม้ปลิวลม', price: 1000 },
 
   // ระดับพรีเมียม — สวยขึ้น แพงขึ้นตามลำดับ
   { id: 'cursor_butterfly', type: 'cursor', cursorId: 'butterfly', emoji: '🦋', name: 'Butterfly Garden', desc: 'ผีเสื้อโบยบินท่ามกลางดอกไม้บานตามเมาส์', price: 1500 },
