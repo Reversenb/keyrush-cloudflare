@@ -134,7 +134,7 @@ shopRoute.post('/equip',
           where: { id: authUser.userId },
           data: type === 'title' ? { equippedTitle: null } : type === 'theme' ? { equippedTheme: null } : { equippedCursor: null }
         })
-        return c.json({ success: true, message: 'ถอดของสำเร็จ' })
+        return c.json({ success: true, message: 'ถอดItemสำเร็จ' })
       }
 
       const item = findItem(itemId)
