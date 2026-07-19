@@ -37,14 +37,16 @@ userRoute.get('/profile/public/:username', async (c) => {
       select: {
         id: true, username: true, displayName: true, avatar: true, bio: true, role: true,
         linuxLevel: true, linuxExp: true, windowsLevel: true, windowsExp: true,
-        equippedTitle: true, createdAt: true
+        equippedTitle: true, equippedFrame: true, createdAt: true
       }
     })
 
     if (!user) return c.json({ success: false, message: 'ไม่พบผู้ใช้นี้ในระบบ' }, 404)
     // 🏷️ แปลง itemId ฉายา → ข้อความที่โชว์ (แคตตาล็อกอยู่ฝั่ง server ที่เดียว)
     const title = user.equippedTitle ? (findItem(user.equippedTitle)?.label ?? null) : null
-    return c.json({ success: true, data: { ...user, title } })
+    // 🖼️ กรอบรูปที่ใส่อยู่ → ส่ง frameId ให้หน้าเว็บทำคลาส .kr-frame-*
+    const frame = user.equippedFrame ? (findItem(user.equippedFrame)?.frameId ?? null) : null
+    return c.json({ success: true, data: { ...user, title, frame } })
   } catch (error) {
     return c.json({ success: false, message: 'เซิร์ฟเวอร์มีปัญหา' }, 500)
   }
@@ -67,7 +69,7 @@ userRoute.get('/progress', async (c) => {
       select: {
         id: true, username: true, displayName: true, avatar: true, bio: true, role: true,
         linuxLevel: true, linuxExp: true, windowsLevel: true, windowsExp: true,
-        coins: true, equippedTitle: true, equippedTheme: true, equippedCursor: true,
+        coins: true, equippedTitle: true, equippedTheme: true, equippedCursor: true, equippedFrame: true,
         adminFavorites: true, createdAt: true
       }
     })
@@ -82,6 +84,7 @@ userRoute.get('/progress', async (c) => {
     const title = user.equippedTitle ? (findItem(user.equippedTitle)?.label ?? null) : null
     const activeTheme = user.equippedTheme ? (findItem(user.equippedTheme)?.themeId ?? null) : null
     const activeCursor = user.equippedCursor ? (findItem(user.equippedCursor)?.cursorId ?? null) : null
+    const activeFrame = user.equippedFrame ? (findItem(user.equippedFrame)?.frameId ?? null) : null
 
     // รายชื่อธีมที่ผู้เล่นเป็นเจ้าของ — Navbar ใช้ตัดสินว่าจะให้สลับไปธีมไหนได้บ้าง
     const ownedItems = await prisma.userItem.findMany({
@@ -93,7 +96,7 @@ userRoute.get('/progress', async (c) => {
       .filter((i) => i?.type === 'theme' && i.themeId)
       .map((i) => i!.themeId as string)
 
-    return c.json({ success: true, data: { ...user, favoriteMissions, title, activeTheme, activeCursor, ownedThemes } })
+    return c.json({ success: true, data: { ...user, favoriteMissions, title, activeTheme, activeCursor, activeFrame, ownedThemes } })
   } catch (error) {
     return c.json({ success: false, message: 'เซิร์ฟเวอร์มีปัญหา' }, 500)
   }

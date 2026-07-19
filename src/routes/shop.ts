@@ -6,6 +6,16 @@ import { z } from 'zod'
 import { zValidator } from '@hono/zod-validator'
 import { authenticateToken } from '../middlewares/auth'
 import { SHOP_ITEMS, findItem } from '../shop/items'
+import type { ShopItemType } from '../shop/items'
+
+// ประเภทสินค้า → ชื่อคอลัมน์ที่เก็บ "ของที่ใส่อยู่" ในตาราง User
+// เพิ่มประเภทใหม่ = เติมบรรทัดเดียวตรงนี้ (เดิมเป็น ternary ซ้อนกัน แก้ทีต้องไล่หลายจุด)
+const EQUIP_FIELD: Record<ShopItemType, 'equippedTitle' | 'equippedTheme' | 'equippedCursor' | 'equippedFrame'> = {
+  title: 'equippedTitle',
+  theme: 'equippedTheme',
+  cursor: 'equippedCursor',
+  frame: 'equippedFrame',
+}
 
 type Bindings = { DB: D1Database; JWT_SECRET: string }
 type Variables = {
@@ -28,7 +38,7 @@ shopRoute.get('/', async (c) => {
     const [user, owned] = await Promise.all([
       prisma.user.findUnique({
         where: { id: authUser.userId },
-        select: { coins: true, equippedTitle: true, equippedTheme: true, equippedCursor: true }
+        select: { coins: true, equippedTitle: true, equippedTheme: true, equippedCursor: true, equippedFrame: true }
       }),
       prisma.userItem.findMany({
         where: { userId: authUser.userId },
@@ -46,7 +56,8 @@ shopRoute.get('/', async (c) => {
         coins: user.coins,
         equippedTitle: user.equippedTitle,
         equippedTheme: user.equippedTheme,
-        equippedCursor: user.equippedCursor
+        equippedCursor: user.equippedCursor,
+        equippedFrame: user.equippedFrame
       }
     })
   } catch (error) {
@@ -124,15 +135,16 @@ shopRoute.post('/equip',
       const adapter = new PrismaD1(c.env.DB)
       const prisma = new PrismaClient({ adapter })
 
-      // ถอดของ: ส่ง itemId ว่าง + ต้องบอกประเภทผ่าน query (?type=title|terminal)
+      // ถอดของ: ส่ง itemId ว่าง + ต้องบอกประเภทผ่าน query (?type=title|theme|cursor|frame)
       if (!itemId) {
-        const type = c.req.query('type')
-        if (type !== 'title' && type !== 'theme' && type !== 'cursor') {
+        const type = c.req.query('type') ?? ''
+        const field = EQUIP_FIELD[type as ShopItemType]
+        if (!field) {
           return c.json({ success: false, message: 'ต้องระบุประเภทที่จะถอด' }, 400)
         }
         await prisma.user.update({
           where: { id: authUser.userId },
-          data: type === 'title' ? { equippedTitle: null } : type === 'theme' ? { equippedTheme: null } : { equippedCursor: null }
+          data: { [field]: null }
         })
         return c.json({ success: true, message: 'ถอดItemสำเร็จ' })
       }
@@ -149,7 +161,7 @@ shopRoute.post('/equip',
 
       await prisma.user.update({
         where: { id: authUser.userId },
-        data: item.type === 'title' ? { equippedTitle: itemId } : item.type === 'theme' ? { equippedTheme: itemId } : { equippedCursor: itemId }
+        data: { [EQUIP_FIELD[item.type]]: itemId }
       })
 
       return c.json({ success: true, message: `ใส่ "${item.name}" แล้ว` })

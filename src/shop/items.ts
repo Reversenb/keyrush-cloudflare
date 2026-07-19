@@ -4,7 +4,7 @@
 // เพิ่มของใหม่ = เติม object ในลิสต์นี้ ไม่ต้องแก้ DB
 // =========================================================================
 
-export type ShopItemType = 'title' | 'theme' | 'cursor'
+export type ShopItemType = 'title' | 'theme' | 'cursor' | 'frame'
 
 export interface ShopItem {
   id: string
@@ -21,6 +21,8 @@ export interface ShopItem {
   // สำหรับ type 'cursor': รหัสเอฟเฟกต์ (ตรงกับ CURSOR_EFFECTS ใน CursorGlow.tsx) + อีโมจิพรีวิว
   cursorId?: string
   emoji?: string
+  // สำหรับ type 'frame': รหัสกรอบ (ตรงกับคลาส .kr-frame-<id> ใน globals.css)
+  frameId?: string
 }
 
 export const SHOP_ITEMS: ShopItem[] = [
@@ -88,6 +90,16 @@ export const SHOP_ITEMS: ShopItem[] = [
   { id: 'cursor_galaxy', type: 'cursor', cursorId: 'galaxy', emoji: '🪐', name: 'Galaxy Dust', desc: 'กาแล็กซี่ ดาวเสาร์', price: 3500 },
   { id: 'cursor_royal', type: 'cursor', cursorId: 'royal', emoji: '👑', name: 'Royal Aura', desc: 'มงกุฎ', price: 5000 },
   { id: 'cursor_dragon', type: 'cursor', cursorId: 'dragonsoul', emoji: '🐉', name: 'Dragon Soul', desc: 'วิญญาณมังกร', price: 8000 },
+
+  // ===== 🖼️ กรอบรูปโปรไฟล์ (โชว์รอบรูปทุกที่ — Navbar / Leaderboard / โปรไฟล์) =====
+  // frameId ต้องตรงกับคลาส .kr-frame-<id> ใน globals.css
+  { id: 'frame_silver', type: 'frame', frameId: 'silver', name: 'Silver Ring', desc: 'กรอบเงินเรียบหรู เริ่มต้นสายสะสม', price: 800, preview: ['#e2e8f0', '#cbd5e1', '#f8fafc'] },
+  { id: 'frame_gold', type: 'frame', frameId: 'gold', name: 'Gold Ring', desc: 'กรอบทองอร่าม บอกทุกคนว่าคุณมาแล้ว', price: 1500, preview: ['#fbbf24', '#f59e0b', '#fef3c7'] },
+  { id: 'frame_neon', type: 'frame', frameId: 'neon', name: 'Neon Cyber', desc: 'กรอบนีออนฟ้าเรืองแสง สายไซเบอร์ต้องมี', price: 2000, preview: ['#22d3ee', '#06b6d4', '#cffafe'] },
+  { id: 'frame_sakura', type: 'frame', frameId: 'sakura', name: 'Sakura Bloom', desc: 'กรอบชมพูซากุระ ละมุนตาสายหวาน', price: 2000, preview: ['#f472b6', '#ec4899', '#fce7f3'] },
+  { id: 'frame_fire', type: 'frame', frameId: 'fire', name: 'Blazing Ring', desc: 'กรอบไฟลุกโชน หมุนวนไม่หยุด', price: 2500, preview: ['#f97316', '#ef4444', '#fed7aa'] },
+  { id: 'frame_diamond', type: 'frame', frameId: 'diamond', name: 'Diamond Aura', desc: 'กรอบเพชรระยิบระยับ ความหรูขั้นสุด', price: 3500, preview: ['#a5f3fc', '#e0e7ff', '#ffffff'] },
+  { id: 'frame_rainbow', type: 'frame', frameId: 'rainbow', name: 'Rainbow Halo', desc: 'กรอบรุ้งหมุนรอบตัว เด่นที่สุดบนกระดาน', price: 4000, preview: ['#f87171', '#4ade80', '#a78bfa'] },
 ]
 
 // หาสินค้าจาก id (ใช้ตอนซื้อ/ใส่ของ)

@@ -25,14 +25,14 @@ leaderboardRoute.get('/:os', async (c) => {
         where: { windowsExp: { gt: 0 } }, 
         orderBy: { windowsExp: 'desc' }, 
         take: 50,
-        select: { id: true, username: true, displayName: true, avatar: true, equippedTitle: true, windowsLevel: true, windowsExp: true }
+        select: { id: true, username: true, displayName: true, avatar: true, equippedTitle: true, equippedFrame: true, windowsLevel: true, windowsExp: true }
       })
     } 
     // 🌍 บอร์ดจัดอันดับรวม (เอาคะแนน Linux + Windows มาบวกกัน)
     else if (os === 'combined') {
       const allUsers = await prisma.user.findMany({
         where: { OR: [{ linuxExp: { gt: 0 } }, { windowsExp: { gt: 0 } }] },
-        select: { id: true, username: true, displayName: true, avatar: true, equippedTitle: true, linuxLevel: true, linuxExp: true, windowsLevel: true, windowsExp: true }
+        select: { id: true, username: true, displayName: true, avatar: true, equippedTitle: true, equippedFrame: true, linuxLevel: true, linuxExp: true, windowsLevel: true, windowsExp: true }
       })
       // เรียงลำดับด้วย JavaScript (เพราะรวม 2 คอลัมน์)
       topUsers = allUsers
@@ -45,14 +45,16 @@ leaderboardRoute.get('/:os', async (c) => {
         where: { linuxExp: { gt: 0 } }, 
         orderBy: { linuxExp: 'desc' }, 
         take: 50,
-        select: { id: true, username: true, displayName: true, avatar: true, equippedTitle: true, linuxLevel: true, linuxExp: true }
+        select: { id: true, username: true, displayName: true, avatar: true, equippedTitle: true, equippedFrame: true, linuxLevel: true, linuxExp: true }
       })
     }
 
     // ??? ???? itemId ??????? ? ???????????????? (????????????????? server ????????)
     const withTitles = topUsers.map((u: any) => ({
       ...u,
-      title: u.equippedTitle ? (findItem(u.equippedTitle)?.label ?? null) : null
+      title: u.equippedTitle ? (findItem(u.equippedTitle)?.label ?? null) : null,
+      // กรอบรูปที่ใส่อยู่ → ส่ง frameId ให้หน้าเว็บเอาไปทำคลาส .kr-frame-*
+      frame: u.equippedFrame ? (findItem(u.equippedFrame)?.frameId ?? null) : null
     }))
 
     return c.json({ success: true, data: withTitles })
