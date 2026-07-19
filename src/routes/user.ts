@@ -7,6 +7,7 @@ import { verify } from 'hono/jwt'
 import { z } from 'zod'
 import { zValidator } from '@hono/zod-validator'
 import { findItem } from '../shop/items'
+import { checkProfanity } from '../lib/profanity'
 
 // 🌟 ผูก Type ให้ TypeScript รู้จักตัวแปร Environment และ Variables (ข้อมูล user จาก Token)
 // 🪙 เหรียญที่ได้ต่อการผ่านด่านใหม่ 1 ด่าน (ใช้ซื้อของในร้าน)
@@ -105,6 +106,13 @@ const profileSchema = z.object({
   displayName: z.string().max(50, 'ชื่อแสดงยาวเกินไป').optional(),
   avatar: z.string().optional(),
   bio: z.string().max(500, 'ประวัติยาวเกินไป').optional()
+}).superRefine((data, ctx) => {
+  // 🚫 กันคำหยาบ/ชื่อสงวน — ต้องเช็คที่ server เพราะยิง API ตรงได้ ไม่ผ่านหน้าเว็บ
+  const nameIssue = checkProfanity(data.displayName, { label: 'ชื่อเล่น', checkReserved: true })
+  if (nameIssue) ctx.addIssue({ code: 'custom', path: ['displayName'], message: nameIssue })
+
+  const bioIssue = checkProfanity(data.bio, { label: 'ประวัติ' })
+  if (bioIssue) ctx.addIssue({ code: 'custom', path: ['bio'], message: bioIssue })
 })
 
 // ==========================================
@@ -113,7 +121,9 @@ const profileSchema = z.object({
 userRoute.put('/profile', 
   zValidator('json', profileSchema, (result, c) => {
     if (!result.success) {
-      return c.json({ success: false, message: 'ข้อมูลโปรไฟล์ไม่ถูกต้อง (Zod Blocked)' }, 400)
+      // ส่งเหตุผลจริงกลับไป (เช่น "ชื่อเล่นมีคำไม่สุภาพ") ผู้ใช้จะได้รู้ว่าต้องแก้อะไร
+      const reason = result.error.issues[0]?.message || 'ข้อมูลโปรไฟล์ไม่ถูกต้อง'
+      return c.json({ success: false, message: reason }, 400)
     }
   }),
   async (c) => {
