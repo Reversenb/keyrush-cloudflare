@@ -4,7 +4,7 @@
 // เพิ่มของใหม่ = เติม object ในลิสต์นี้ ไม่ต้องแก้ DB
 // =========================================================================
 
-export type ShopItemType = 'title' | 'theme' | 'cursor' | 'frame'
+export type ShopItemType = 'title' | 'theme' | 'cursor' | 'frame' | 'row'
 
 export interface ShopItem {
   id: string
@@ -23,6 +23,8 @@ export interface ShopItem {
   emoji?: string
   // สำหรับ type 'frame': รหัสกรอบ (ตรงกับคลาส .kr-frame-<id> ใน globals.css)
   frameId?: string
+  // สำหรับ type 'row': รหัสเอฟเฟกต์แถว Leaderboard (ตรงกับคลาส .kr-row-<id> ใน globals.css)
+  rowId?: string
 }
 
 export const SHOP_ITEMS: ShopItem[] = [
@@ -100,6 +102,16 @@ export const SHOP_ITEMS: ShopItem[] = [
   { id: 'frame_fire', type: 'frame', frameId: 'fire', name: 'Blazing Ring', desc: 'กรอบไฟลุกโชน หมุนวนไม่หยุด', price: 2500, preview: ['#f97316', '#ef4444', '#fed7aa'] },
   { id: 'frame_diamond', type: 'frame', frameId: 'diamond', name: 'Diamond Aura', desc: 'กรอบเพชรระยิบระยับ ความหรูขั้นสุด', price: 3500, preview: ['#a5f3fc', '#e0e7ff', '#ffffff'] },
   { id: 'frame_rainbow', type: 'frame', frameId: 'rainbow', name: 'Rainbow Halo', desc: 'กรอบรุ้งหมุนรอบตัว เด่นที่สุดบนกระดาน', price: 4000, preview: ['#f87171', '#4ade80', '#a78bfa'] },
+
+  // ===== ✨ เอฟเฟกต์แถว Leaderboard (วิ่งผ่านแถวของเราทุกๆ ~10 วิ ให้คนอื่นเห็น) =====
+  // rowId ต้องตรงกับคลาส .kr-row-<id> ใน globals.css
+  { id: 'row_ember', type: 'row', rowId: 'ember', name: 'Ember Trail', desc: 'ประกายไฟอุ่นๆ วิ่งผ่านแถวของคุณเป็นระยะ', price: 2500, preview: ['#fff7ed', '#f97316', '#fbbf24'] },
+  { id: 'row_frost', type: 'row', rowId: 'frost', name: 'Frost Wave', desc: 'คลื่นน้ำแข็งเย็นเฉียบกวาดผ่านแถว', price: 2500, preview: ['#f0f9ff', '#38bdf8', '#a5f3fc'] },
+  { id: 'row_thunder', type: 'row', rowId: 'thunder', name: 'Thunder Strike', desc: 'สายฟ้าฟาดวาบ สะดุดตาสุดๆ', price: 3500, preview: ['#fefce8', '#facc15', '#fde68a'] },
+  { id: 'row_gold', type: 'row', rowId: 'gold', name: 'Golden Shine', desc: 'แสงทองไหลผ่านแถว บอกความมั่งคั่ง', price: 4500, preview: ['#fffbeb', '#f59e0b', '#fef3c7'] },
+  { id: 'row_matrix', type: 'row', rowId: 'matrix', name: 'Matrix Scan', desc: 'ลำแสงเขียวสแกนแถวแบบสายแฮก', price: 5000, preview: ['#052e16', '#22c55e', '#86efac'] },
+  { id: 'row_inferno', type: 'row', rowId: 'inferno', name: 'Inferno Blaze', desc: 'เปลวเพลิงลุกท่วมทั้งแถว ระดับตำนาน', price: 7000, preview: ['#1a0505', '#ef4444', '#fb923c'] },
+  { id: 'row_prism', type: 'row', rowId: 'prism', name: 'Prism Flow', desc: 'แสงรุ้งไหลผ่านแถว หรูที่สุดในร้าน', price: 8000, preview: ['#faf5ff', '#a78bfa', '#f472b6'] },
 ]
 
 // หาสินค้าจาก id (ใช้ตอนซื้อ/ใส่ของ)

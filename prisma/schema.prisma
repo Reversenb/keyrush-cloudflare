@@ -61,6 +61,7 @@ model User {
   equippedTheme    String?   // itemId ของธีมเว็บที่ใส่อยู่
   equippedCursor   String?   // itemId ของเอฟเฟกต์เมาส์ที่ใส่อยู่
   equippedFrame    String?   // itemId ของกรอบรูปโปรไฟล์ที่ใส่อยู่
+  equippedRow      String?   // itemId ของเอฟเฟกต์แถว Leaderboard ที่ใส่อยู่
   createdAt        DateTime  @default(now())
   Progress         Progress[]
   playHistories    PlayHistory[]

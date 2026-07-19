@@ -10,11 +10,12 @@ import type { ShopItemType } from '../shop/items'
 
 // ประเภทสินค้า → ชื่อคอลัมน์ที่เก็บ "ของที่ใส่อยู่" ในตาราง User
 // เพิ่มประเภทใหม่ = เติมบรรทัดเดียวตรงนี้ (เดิมเป็น ternary ซ้อนกัน แก้ทีต้องไล่หลายจุด)
-const EQUIP_FIELD: Record<ShopItemType, 'equippedTitle' | 'equippedTheme' | 'equippedCursor' | 'equippedFrame'> = {
+const EQUIP_FIELD: Record<ShopItemType, 'equippedTitle' | 'equippedTheme' | 'equippedCursor' | 'equippedFrame' | 'equippedRow'> = {
   title: 'equippedTitle',
   theme: 'equippedTheme',
   cursor: 'equippedCursor',
   frame: 'equippedFrame',
+  row: 'equippedRow',
 }
 
 type Bindings = { DB: D1Database; JWT_SECRET: string }
@@ -38,7 +39,7 @@ shopRoute.get('/', async (c) => {
     const [user, owned] = await Promise.all([
       prisma.user.findUnique({
         where: { id: authUser.userId },
-        select: { coins: true, equippedTitle: true, equippedTheme: true, equippedCursor: true, equippedFrame: true }
+        select: { coins: true, equippedTitle: true, equippedTheme: true, equippedCursor: true, equippedFrame: true, equippedRow: true }
       }),
       prisma.userItem.findMany({
         where: { userId: authUser.userId },
@@ -57,7 +58,8 @@ shopRoute.get('/', async (c) => {
         equippedTitle: user.equippedTitle,
         equippedTheme: user.equippedTheme,
         equippedCursor: user.equippedCursor,
-        equippedFrame: user.equippedFrame
+        equippedFrame: user.equippedFrame,
+        equippedRow: user.equippedRow
       }
     })
   } catch (error) {

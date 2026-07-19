@@ -69,7 +69,7 @@ userRoute.get('/progress', async (c) => {
       select: {
         id: true, username: true, displayName: true, avatar: true, bio: true, role: true,
         linuxLevel: true, linuxExp: true, windowsLevel: true, windowsExp: true,
-        coins: true, equippedTitle: true, equippedTheme: true, equippedCursor: true, equippedFrame: true,
+        coins: true, equippedTitle: true, equippedTheme: true, equippedCursor: true, equippedFrame: true, equippedRow: true,
         adminFavorites: true, createdAt: true
       }
     })
@@ -85,6 +85,7 @@ userRoute.get('/progress', async (c) => {
     const activeTheme = user.equippedTheme ? (findItem(user.equippedTheme)?.themeId ?? null) : null
     const activeCursor = user.equippedCursor ? (findItem(user.equippedCursor)?.cursorId ?? null) : null
     const activeFrame = user.equippedFrame ? (findItem(user.equippedFrame)?.frameId ?? null) : null
+    const activeRow = user.equippedRow ? (findItem(user.equippedRow)?.rowId ?? null) : null
 
     // รายชื่อธีมที่ผู้เล่นเป็นเจ้าของ — Navbar ใช้ตัดสินว่าจะให้สลับไปธีมไหนได้บ้าง
     const ownedItems = await prisma.userItem.findMany({
@@ -96,7 +97,7 @@ userRoute.get('/progress', async (c) => {
       .filter((i) => i?.type === 'theme' && i.themeId)
       .map((i) => i!.themeId as string)
 
-    return c.json({ success: true, data: { ...user, favoriteMissions, title, activeTheme, activeCursor, activeFrame, ownedThemes } })
+    return c.json({ success: true, data: { ...user, favoriteMissions, title, activeTheme, activeCursor, activeFrame, activeRow, ownedThemes } })
   } catch (error) {
     return c.json({ success: false, message: 'เซิร์ฟเวอร์มีปัญหา' }, 500)
   }
