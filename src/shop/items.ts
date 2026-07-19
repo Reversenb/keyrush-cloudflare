@@ -112,6 +112,13 @@ export const SHOP_ITEMS: ShopItem[] = [
   { id: 'row_matrix', type: 'row', rowId: 'matrix', name: 'Matrix Scan', desc: 'ลำแสงเขียวสแกนแถวแบบสายแฮก', price: 5000, preview: ['#052e16', '#22c55e', '#86efac'] },
   { id: 'row_inferno', type: 'row', rowId: 'inferno', name: 'Inferno Blaze', desc: 'เปลวเพลิงลุกท่วมทั้งแถว ระดับตำนาน', price: 7000, preview: ['#1a0505', '#ef4444', '#fb923c'] },
   { id: 'row_prism', type: 'row', rowId: 'prism', name: 'Prism Flow', desc: 'แสงรุ้งไหลผ่านแถว หรูที่สุดในร้าน', price: 8000, preview: ['#faf5ff', '#a78bfa', '#f472b6'] },
+
+  // รุ่นใหม่ — เอฟเฟกต์อนุภาค/บรรยากาศ จัดเต็มกว่าเดิม
+  { id: 'row_sakura', type: 'row', rowId: 'sakura', name: 'Sakura Drift', desc: 'กลีบซากุระปลิวโปรยผ่านแถวของคุณ', price: 3000, preview: ['#fff1f5', '#f472b6', '#fbcfe8'] },
+  { id: 'row_ocean', type: 'row', rowId: 'ocean', name: 'Ocean Bubbles', desc: 'ฟองคลื่นทะเลลอยขึ้นเป็นระลอก', price: 3000, preview: ['#eff6ff', '#38bdf8', '#a5f3fc'] },
+  { id: 'row_void', type: 'row', rowId: 'void', name: 'Void Whisper', desc: 'หมอกมืดสีม่วงคืบคลานจากสองฟาก น่าขนลุก', price: 5500, preview: ['#1e1b4b', '#a78bfa', '#6d28d9'] },
+  { id: 'row_galaxy', type: 'row', rowId: 'galaxy', name: 'Starfall Galaxy', desc: 'ทุ่งดาวระยิบ พร้อมดาวตกพาดผ่าน', price: 6000, preview: ['#0f172a', '#a5b4fc', '#e0e7ff'] },
+  { id: 'row_glitch', type: 'row', rowId: 'glitch', name: 'Cyber Glitch', desc: 'สัญญาณภาพแตกซ่า RGB สายไซเบอร์พังก์', price: 6500, preview: ['#0a0a0a', '#22d3ee', '#f43f5e'] },
 ]
 
 // หาสินค้าจาก id (ใช้ตอนซื้อ/ใส่ของ)
