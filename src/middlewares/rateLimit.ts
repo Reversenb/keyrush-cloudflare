@@ -13,7 +13,7 @@ export const rateLimiter = async (c: Context, next: Next) => {
   // /api/survival/answer ถูกยิงทุกข้อระหว่างเล่น (คนเก่งๆ ~20 ครั้ง/นาที) เลยแยกสมุดจด
   // และให้โควต้าสูงกว่า — จะได้ไม่ไปเบียดโควต้า request ปกติของผู้เล่น
   const isSurvivalAnswer = c.req.path === '/api/survival/answer'
-  const LIMIT = isSurvivalAnswer ? 90 : 30 // ห้ามยิงเกินโควต้านี้
+  const LIMIT = isSurvivalAnswer ? 90 : 90 // ห้ามยิงเกินโควต้านี้
   const WINDOW_MS = 60 * 1000 // ในระยะเวลา 1 นาที (60,000 มิลลิวินาที)
   const bucketKey = isSurvivalAnswer ? `${ip}:survival-answer` : ip
 
