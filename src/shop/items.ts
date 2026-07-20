@@ -57,6 +57,11 @@ export const SHOP_ITEMS: ShopItem[] = [
 
   // ===== 🎨 ธีมเว็บพรีเมียม (เปลี่ยนสีทั้งเว็บ ไม่ใช่แค่ terminal) =====
   {
+    id: 'theme_hacker', type: 'theme', themeId: 'hacker',
+    name: 'Hacker', desc: 'ธีมดำเขียวสไตล์เทอร์มินัล สายเจาะระบบตัวจริงต้องมี',
+    price: 5000, preview: ['#050505', '#22c55e', '#166534']
+  },
+  {
     id: 'theme_sakura', type: 'theme', themeId: 'sakura',
     name: 'Sakura', desc: 'ธีมชมพูหวานละมุน สดใสน่ารัก เหมาะกับสายหวาน',
     price: 1500, preview: ['#fff1f5', '#ec4899', '#fda4af']
@@ -65,6 +70,11 @@ export const SHOP_ITEMS: ShopItem[] = [
     id: 'theme_dragon', type: 'theme', themeId: 'dragon',
     name: 'Red Dragon', desc: 'ธีมมืดแดงเพลิง ดุดันสายโหด สำหรับนักล่าตัวจริง',
     price: 2500, preview: ['#1a0505', '#ef4444', '#fca5a5']
+  },
+  {
+    id: 'theme_amethyst', type: 'theme', themeId: 'amethyst',
+    name: 'Amethyst Night', desc: 'ธีมมืดม่วงเข้ม เปลี่ยนสีเน้นจากทองเป็นม่วงอเมทิสต์ หรูลึกลับทั้งเว็บ',
+    price: 2000, preview: ['#2e2946', '#a855f7', '#c084fc']
   },
   {
     id: 'theme_sky', type: 'theme', themeId: 'sky',
@@ -102,6 +112,31 @@ export const SHOP_ITEMS: ShopItem[] = [
   { id: 'frame_fire', type: 'frame', frameId: 'fire', name: 'Blazing Ring', desc: 'กรอบไฟลุกโชน หมุนวนไม่หยุด', price: 2500, preview: ['#f97316', '#ef4444', '#fed7aa'] },
   { id: 'frame_diamond', type: 'frame', frameId: 'diamond', name: 'Diamond Aura', desc: 'กรอบเพชรระยิบระยับ ความหรูขั้นสุด', price: 3500, preview: ['#a5f3fc', '#e0e7ff', '#ffffff'] },
   { id: 'frame_rainbow', type: 'frame', frameId: 'rainbow', name: 'Rainbow Halo', desc: 'กรอบรุ้งหมุนรอบตัว เด่นที่สุดบนกระดาน', price: 4000, preview: ['#f87171', '#4ade80', '#a78bfa'] },
+
+  // ── ระดับเริ่มต้น: วงแหวนสีเดียวเรืองแสง เก็บสะสมง่าย ราคาเบาๆ ──
+  { id: 'frame_bronze', type: 'frame', frameId: 'bronze', name: 'Bronze Ring', desc: 'กรอบทองแดงอุ่นตา ก้าวแรกของนักสะสม', price: 300, preview: ['#d97706', '#b45309', '#fed7aa'] },
+  { id: 'frame_rose', type: 'frame', frameId: 'rose', name: 'Rose Quartz', desc: 'กรอบชมพูโรสควอตซ์ นุ่มนวลไม่จัดจ้าน', price: 500, preview: ['#fb7185', '#e11d48', '#ffe4e6'] },
+  { id: 'frame_mint', type: 'frame', frameId: 'mint', name: 'Mint Fresh', desc: 'กรอบเขียวมิ้นสดชื่น เย็นตาสบายใจ', price: 600, preview: ['#34d399', '#059669', '#d1fae5'] },
+  { id: 'frame_sky', type: 'frame', frameId: 'sky', name: 'Sky Halo', desc: 'กรอบฟ้าใสเหมือนท้องฟ้าวันอากาศดี', price: 700, preview: ['#38bdf8', '#0284c7', '#e0f2fe'] },
+  { id: 'frame_violet', type: 'frame', frameId: 'violet', name: 'Violet Dusk', desc: 'กรอบม่วงยามพลบค่ำ ลึกลับมีเสน่ห์', price: 900, preview: ['#a78bfa', '#7c3aed', '#ede9fe'] },
+  { id: 'frame_crimson', type: 'frame', frameId: 'crimson', name: 'Crimson Edge', desc: 'กรอบแดงเข้มคมกริบ ดุดันแบบไม่ต้องพูดเยอะ', price: 1200, preview: ['#dc2626', '#991b1b', '#fecaca'] },
+
+  // ── ระดับกลาง: วงแหวนไล่สีหมุนรอบตัว ──
+  { id: 'frame_emerald', type: 'frame', frameId: 'emerald', name: 'Emerald Vortex', desc: 'มรกตหมุนวน เขียวลึกราวอัญมณีแท้', price: 1800, preview: ['#10b981', '#065f46', '#a7f3d0'] },
+  { id: 'frame_ocean', type: 'frame', frameId: 'ocean', name: 'Ocean Tide', desc: 'เกลียวคลื่นทะเลลึกหมุนไม่มีวันหยุด', price: 2200, preview: ['#0ea5e9', '#1e40af', '#a5f3fc'] },
+  { id: 'frame_sunset', type: 'frame', frameId: 'sunset', name: 'Sunset Blaze', desc: 'พระอาทิตย์ตกไล่สีส้ม-ชมพู-ม่วง อบอุ่นสุดๆ', price: 2800, preview: ['#fb923c', '#f472b6', '#a78bfa'] },
+  { id: 'frame_amethyst', type: 'frame', frameId: 'amethyst', name: 'Amethyst Storm', desc: 'พายุอเมทิสต์ ม่วงเข้มสลับชมพูประกาย', price: 3200, preview: ['#c084fc', '#7e22ce', '#f0abfc'] },
+
+  // ── ระดับสูง: ไล่สี + เรืองแสงเต้นเป็นจังหวะ ──
+  { id: 'frame_venom', type: 'frame', frameId: 'venom', name: 'Venom Pulse', desc: 'พิษเขียวเรืองแสงเต้นตุบๆ อันตรายแต่สวย', price: 4500, preview: ['#84cc16', '#15803d', '#d9f99d'] },
+  { id: 'frame_galaxy', type: 'frame', frameId: 'galaxy', name: 'Galaxy Core', desc: 'ใจกลางกาแล็กซี ม่วง-คราม-ชมพูหมุนช้าๆ', price: 5500, preview: ['#6366f1', '#1e1b4b', '#e879f9'] },
+  { id: 'frame_phoenix', type: 'frame', frameId: 'phoenix', name: 'Phoenix Rebirth', desc: 'เพลิงฟีนิกซ์คืนชีพ แดง-ส้ม-ทองลุกโชนไม่ดับ', price: 6500, preview: ['#ef4444', '#f59e0b', '#fde68a'] },
+  { id: 'frame_aurora', type: 'frame', frameId: 'aurora', name: 'Aurora Veil', desc: 'ม่านแสงเหนือพลิ้วไหว เขียว-ฟ้า-ม่วงเรืองรอง', price: 7500, preview: ['#34d399', '#22d3ee', '#a78bfa'] },
+
+  // ── ระดับตำนาน: วงแหวนหนาพิเศษ แสงจัดเต็ม มีไม่กี่คนที่มี ──
+  { id: 'frame_eclipse', type: 'frame', frameId: 'eclipse', name: 'Solar Eclipse', desc: 'สุริยุปราคา วงแหวนทองล้อมความมืดมิด', price: 9000, preview: ['#0a0a0a', '#fbbf24', '#fef3c7'] },
+  { id: 'frame_dragon', type: 'frame', frameId: 'dragon', name: 'Dragon Sovereign', desc: 'เกล็ดมังกรแดง-ทองหมุนเร็วดั่งลมพายุ ราชาแห่งกรอบ', price: 10500, preview: ['#7f1d1d', '#ef4444', '#fbbf24'] },
+  { id: 'frame_void', type: 'frame', frameId: 'void', name: 'Void Singularity', desc: 'หลุมดำดูดกลืนทุกสิ่ง ม่วงเข้มหมุนช้าอย่างน่าขนลุก — ที่สุดของร้าน', price: 12000, preview: ['#000000', '#7c3aed', '#c4b5fd'] },
 
   // ===== ✨ เอฟเฟกต์แถว Leaderboard (วิ่งผ่านแถวของเราทุกๆ ~10 วิ ให้คนอื่นเห็น) =====
   // rowId ต้องตรงกับคลาส .kr-row-<id> ใน globals.css
