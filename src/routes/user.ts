@@ -7,7 +7,7 @@ import { verify } from 'hono/jwt'
 import { z } from 'zod'
 import { zValidator } from '@hono/zod-validator'
 import { findItem } from '../shop/items'
-import { calcStreak } from '../lib/streak'
+import { calcStreak, streakSince } from '../lib/streak'
 import { checkProfanity } from '../lib/profanity'
 
 // 🌟 ผูก Type ให้ TypeScript รู้จักตัวแปร Environment และ Variables (ข้อมูล user จาก Token)
@@ -47,7 +47,13 @@ userRoute.get('/profile/public/:username', async (c) => {
     const title = user.equippedTitle ? (findItem(user.equippedTitle)?.label ?? null) : null
     // 🖼️ กรอบรูปที่ใส่อยู่ → ส่ง frameId ให้หน้าเว็บทำคลาส .kr-frame-*
     const frame = user.equippedFrame ? (findItem(user.equippedFrame)?.frameId ?? null) : null
-    return c.json({ success: true, data: { ...user, title, frame } })
+    // 🔥 สตรีควันฝึกต่อเนื่อง — คิดสดจากประวัติเล่น (ดู src/lib/streak.ts)
+    const playDays = await prisma.playHistory.findMany({
+      where: { userId: user.id, createdAt: { gte: streakSince() } },
+      select: { createdAt: true }
+    })
+    const streak = calcStreak(playDays.map((p) => p.createdAt))
+    return c.json({ success: true, data: { ...user, title, frame, streak } })
   } catch (error) {
     return c.json({ success: false, message: 'เซิร์ฟเวอร์มีปัญหา' }, 500)
   }
@@ -101,7 +107,7 @@ userRoute.get('/progress', async (c) => {
     // 🔥 สตรีค — คิดสดจากประวัติเล่น (ดู src/lib/streak.ts ว่าทำไมไม่เก็บเป็นคอลัมน์)
     // ดึงเฉพาะ createdAt ก็พอ ไม่ต้องลากทั้งแถวมาให้เปลืองแบนด์วิดท์
     const playDays = await prisma.playHistory.findMany({
-      where: { userId: authUser.userId },
+      where: { userId: authUser.userId, createdAt: { gte: streakSince() } },
       select: { createdAt: true }
     })
     const streak = calcStreak(playDays.map((p) => p.createdAt))

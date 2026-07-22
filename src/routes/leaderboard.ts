@@ -3,6 +3,7 @@ import { PrismaClient } from '@prisma/client'
 import { PrismaD1 } from '@prisma/adapter-d1'
 import type { D1Database } from '@cloudflare/workers-types'
 import { findItem } from '../shop/items'
+import { calcStreak, streakSince } from '../lib/streak'
 
 // 🌟 ผูก Type ให้ TypeScript รู้จักตัวแปร DB
 type Bindings = { DB: D1Database }
@@ -49,14 +50,29 @@ leaderboardRoute.get('/:os', async (c) => {
       })
     }
 
-    // ??? ???? itemId ??????? ? ???????????????? (????????????????? server ????????)
+    // 🔥 สตรีคของทุกคนบนกระดาน — ยิง query เดียวแล้วแยกกลุ่มใน JS
+    // (ห้ามวนเรียกทีละคน ไม่งั้นกลายเป็น 50 queries ต่อการเปิดหน้า 1 ครั้ง)
+    const ids = topUsers.map((u: any) => u.id)
+    const plays = await prisma.playHistory.findMany({
+      where: { userId: { in: ids }, createdAt: { gte: streakSince() } },
+      select: { userId: true, createdAt: true }
+    })
+    const playsByUser = new Map<string, Date[]>()
+    for (const p of plays) {
+      const list = playsByUser.get(p.userId)
+      if (list) list.push(p.createdAt)
+      else playsByUser.set(p.userId, [p.createdAt])
+    }
+
+    // แปลง itemId ของที่ใส่อยู่ → ค่าที่หน้าเว็บใช้ได้ (แคตตาล็อกอยู่ฝั่ง server ที่เดียว)
     const withTitles = topUsers.map((u: any) => ({
       ...u,
       title: u.equippedTitle ? (findItem(u.equippedTitle)?.label ?? null) : null,
       // กรอบรูปที่ใส่อยู่ → ส่ง frameId ให้หน้าเว็บเอาไปทำคลาส .kr-frame-*
       frame: u.equippedFrame ? (findItem(u.equippedFrame)?.frameId ?? null) : null,
       // เอฟเฟกต์แถวที่ใส่อยู่ → ส่ง rowId ให้หน้าเว็บทำคลาส .kr-row-*
-      rowEffect: u.equippedRow ? (findItem(u.equippedRow)?.rowId ?? null) : null
+      rowEffect: u.equippedRow ? (findItem(u.equippedRow)?.rowId ?? null) : null,
+      streak: calcStreak(playsByUser.get(u.id) ?? [])
     }))
 
     return c.json({ success: true, data: withTitles })

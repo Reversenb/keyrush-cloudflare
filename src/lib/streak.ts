@@ -13,6 +13,14 @@
 /** เว้นได้ไม่เกินกี่วันก่อนสตรีคขาด */
 export const STREAK_GRACE_DAYS = 3
 
+/** ย้อนดูประวัติแค่ 1 ปี — จำกัดขนาด query โดยเฉพาะหน้า Leaderboard ที่คิดทีเดียว 50 คน
+ *  (สตรีคเกิน 365 วันแทบเป็นไปไม่ได้ และถ้าถึงจริงก็ยังโชว์ 365 ซึ่งไม่ผิดในทางปฏิบัติ) */
+export const STREAK_LOOKBACK_DAYS = 365
+
+/** วันที่เริ่มนับย้อนหลัง — ใช้เป็นเงื่อนไข `createdAt: { gte: ... }` ตอน query */
+export const streakSince = (now: Date = new Date()): Date =>
+  new Date(now.getTime() - STREAK_LOOKBACK_DAYS * 24 * 60 * 60 * 1000)
+
 // ผู้เล่นเป็นคนไทย — ตัดวันตามเวลาไทย (UTC+7) ไม่ใช่ UTC
 // ไม่งั้นคนที่เล่นตอนตี 1 จะถูกนับเป็นวันก่อนหน้า
 const BANGKOK_OFFSET_MS = 7 * 60 * 60 * 1000
