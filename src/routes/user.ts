@@ -7,6 +7,7 @@ import { verify } from 'hono/jwt'
 import { z } from 'zod'
 import { zValidator } from '@hono/zod-validator'
 import { findItem } from '../shop/items'
+import { calcStreak } from '../lib/streak'
 import { checkProfanity } from '../lib/profanity'
 
 // 🌟 ผูก Type ให้ TypeScript รู้จักตัวแปร Environment และ Variables (ข้อมูล user จาก Token)
@@ -97,7 +98,15 @@ userRoute.get('/progress', async (c) => {
       .filter((i) => i?.type === 'theme' && i.themeId)
       .map((i) => i!.themeId as string)
 
-    return c.json({ success: true, data: { ...user, favoriteMissions, title, activeTheme, activeCursor, activeFrame, activeRow, ownedThemes } })
+    // 🔥 สตรีค — คิดสดจากประวัติเล่น (ดู src/lib/streak.ts ว่าทำไมไม่เก็บเป็นคอลัมน์)
+    // ดึงเฉพาะ createdAt ก็พอ ไม่ต้องลากทั้งแถวมาให้เปลืองแบนด์วิดท์
+    const playDays = await prisma.playHistory.findMany({
+      where: { userId: authUser.userId },
+      select: { createdAt: true }
+    })
+    const streak = calcStreak(playDays.map((p) => p.createdAt))
+
+    return c.json({ success: true, data: { ...user, favoriteMissions, title, activeTheme, activeCursor, activeFrame, activeRow, ownedThemes, streak } })
   } catch (error) {
     return c.json({ success: false, message: 'เซิร์ฟเวอร์มีปัญหา' }, 500)
   }
