@@ -40,6 +40,18 @@ const favoriteSchema = z.object({
   missionId: z.string().min(1, { message: 'ต้องระบุ ID ของโจทย์' })
 })
 
+// 🔀 สลับ level ของโจทย์สองข้อ (เนื้อหาคงเดิม แลกกันแค่เลขด่าน)
+const missionSwapSchema = z.object({
+  idA: z.string().min(1, { message: 'ต้องระบุโจทย์ข้อแรก' }),
+  idB: z.string().min(1, { message: 'ต้องระบุโจทย์ข้อที่สอง' })
+})
+
+// ↕️ เรียงลำดับใหม่ทั้งหมวด — ส่ง id เรียงตามลำดับที่ต้องการ แล้วไล่เลข 1..N ให้
+const missionReorderSchema = z.object({
+  os: z.enum(['linux', 'windows'], { message: 'OS ต้องเป็น linux หรือ windows เท่านั้น' }),
+  orderedIds: z.array(z.string().min(1)).min(1, { message: 'ต้องมีอย่างน้อย 1 โจทย์' })
+})
+
 // ==========================================
 // 🚀 API: ดึงโจทย์ทั้งหมด (สำหรับหน้า Dashboard Admin)
 // ==========================================
@@ -89,6 +101,94 @@ adminRoute.post('/missions',
     return c.json({ success: false, message: 'เซิร์ฟเวอร์มีปัญหา' }, 500)
   }
 })
+
+// ==========================================
+// 🔀 API: สลับ level ของโจทย์ 2 ข้อ (เนื้อหาไม่ขยับ แลกกันแค่เลขด่าน)
+//
+// ⚠️ schema มี @@unique([os, level]) → จะ UPDATE ตรงๆ สลับกันไม่ได้ เพราะจังหวะ
+//    ที่ตัวแรกย้ายไปเลขของตัวที่สองจะชน constraint ทันที
+//    จึงต้องพักตัวแรกไว้ที่ "เลขติดลบ" ก่อน (ด่านจริงเริ่มที่ 1 เลขลบจึงว่างเสมอ)
+//    แล้วค่อยย้ายอีกตัวเข้ามา — ส่งเป็น $transaction เพื่อให้ทั้ง 3 สเต็ปสำเร็จหรือ
+//    ล้มเหลวพร้อมกัน ไม่ปล่อยให้มีโจทย์ค้างอยู่ที่เลขติดลบ
+// ==========================================
+adminRoute.put('/missions/swap',
+  zValidator('json', missionSwapSchema, (result, c) => {
+    if (!result.success) return c.json({ success: false, message: 'ข้อมูลไม่ถูกต้อง', error: result.error.issues }, 400)
+  }),
+  async (c) => {
+    try {
+      const { idA, idB } = c.req.valid('json')
+      if (idA === idB) return c.json({ success: false, message: 'เลือกโจทย์คนละข้อด้วย' }, 400)
+
+      const adapter = new PrismaD1(c.env.DB)
+      const prisma = new PrismaClient({ adapter })
+
+      const [a, b] = await Promise.all([
+        prisma.mission.findUnique({ where: { id: idA }, select: { id: true, os: true, level: true } }),
+        prisma.mission.findUnique({ where: { id: idB }, select: { id: true, os: true, level: true } })
+      ])
+
+      if (!a || !b) return c.json({ success: false, message: 'ไม่พบโจทย์ที่เลือก' }, 404)
+      // ข้าม OS ไม่ได้ เพราะเลขด่านของ linux/windows เป็นคนละชุดกัน สลับแล้วลำดับจะเพี้ยนทั้งสองฝั่ง
+      if (a.os !== b.os) return c.json({ success: false, message: 'สลับข้าม OS ไม่ได้ ต้องเป็นหมวดเดียวกัน' }, 400)
+
+      await prisma.$transaction([
+        prisma.mission.update({ where: { id: a.id }, data: { level: -a.level } }), // พักไว้ที่เลขลบ
+        prisma.mission.update({ where: { id: b.id }, data: { level: a.level } }),
+        prisma.mission.update({ where: { id: a.id }, data: { level: b.level } })
+      ])
+
+      return c.json({ success: true, message: `สลับ Level ${a.level} ↔ ${b.level} สำเร็จ!` })
+    } catch (error) {
+      return c.json({ success: false, message: 'สลับโจทย์ไม่สำเร็จ' }, 500)
+    }
+  })
+
+// ==========================================
+// ↕️ API: เรียงลำดับโจทย์ใหม่ทั้งหมวด (ใช้กับการลากวาง)
+//
+// รับ id เรียงตามลำดับที่ต้องการ แล้วไล่เลขให้เป็น 1..N
+// ⚠️ ติด @@unique([os, level]) เหมือนกัน → ต้องทำ 2 รอบ:
+//    รอบแรกย้ายทุกข้อไปพักที่เลขลบ (เคลียร์เลข 1..N ให้ว่างทั้งแถว)
+//    รอบสองค่อยวางเลขจริง — ถ้าทำรอบเดียวจะชนกับข้อที่ยังไม่ได้ขยับ
+// ==========================================
+adminRoute.put('/missions/reorder',
+  zValidator('json', missionReorderSchema, (result, c) => {
+    if (!result.success) return c.json({ success: false, message: 'ข้อมูลไม่ถูกต้อง', error: result.error.issues }, 400)
+  }),
+  async (c) => {
+    try {
+      const { os, orderedIds } = c.req.valid('json')
+      const adapter = new PrismaD1(c.env.DB)
+      const prisma = new PrismaClient({ adapter })
+
+      const missions = await prisma.mission.findMany({ where: { os }, select: { id: true } })
+
+      // ต้องส่งมาครบทั้งหมวด ไม่งั้นการไล่เลข 1..N จะไปทับข้อที่ไม่ได้ส่งมา
+      const known = new Set(missions.map((m) => m.id))
+      if (orderedIds.length !== missions.length || orderedIds.some((id) => !known.has(id))) {
+        return c.json({ success: false, message: 'รายการโจทย์ไม่ตรงกับในระบบ กรุณารีเฟรชแล้วลองใหม่' }, 400)
+      }
+      if (new Set(orderedIds).size !== orderedIds.length) {
+        return c.json({ success: false, message: 'มีโจทย์ซ้ำในรายการที่ส่งมา' }, 400)
+      }
+
+      await prisma.$transaction([
+        // รอบ 1: พักทุกข้อไว้ที่เลขลบ เพื่อเคลียร์เลข 1..N ให้ว่าง
+        ...orderedIds.map((id, i) =>
+          prisma.mission.update({ where: { id }, data: { level: -(i + 1) } })
+        ),
+        // รอบ 2: วางเลขจริงตามลำดับใหม่
+        ...orderedIds.map((id, i) =>
+          prisma.mission.update({ where: { id }, data: { level: i + 1 } })
+        )
+      ])
+
+      return c.json({ success: true, message: `เรียงลำดับโจทย์ ${os} ใหม่แล้ว (${orderedIds.length} ข้อ)` })
+    } catch (error) {
+      return c.json({ success: false, message: 'เรียงลำดับไม่สำเร็จ' }, 500)
+    }
+  })
 
 // ==========================================
 // 🚀 API: อัปเดต/แก้ไขโจทย์ [ติดเกราะ Zod]

@@ -29,6 +29,7 @@ export interface ShopItem {
 
 export const SHOP_ITEMS: ShopItem[] = [
   // ===== 🏷️ ฉายา (โชว์ข้างชื่อบน Leaderboard / โปรไฟล์) =====
+  { id: 'title_cs', type: 'title', name: 'Comsci', desc: 'Comsci', price: 50, label: 'Comsci' },
   { id: 'title_rome', type: 'title', name: 'กรุงโรม', desc: 'กรุงโรมสร้างเสร็จภายในวันเดียว', price: 50, label: 'กรุงโรมสร้างเสร็จภายในวันเดียว' },
   { id: 'title_ai', type: 'title', name: 'Ai ร่างมนุษย์', desc: 'ฉายาสำหรับคนที่ชอบ AI', price: 100, label: 'Ai ร่างมนุษย์' },
   { id: 'title_bid', type: 'title', name: 'นักบิด', desc: 'ฉายาสำหรับสายขี้เกียจ', price: 50, label: 'นักบิด' },
