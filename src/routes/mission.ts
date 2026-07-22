@@ -6,6 +6,7 @@ import { z } from 'zod'
 import { zValidator } from '@hono/zod-validator'
 import { sign, verify } from 'hono/jwt'
 import { authenticateToken } from '../middlewares/auth'
+import { isAnswerCorrect } from '../lib/answerCheck'
 
 type Bindings = { DB: D1Database; JWT_SECRET: string }
 type Variables = {
@@ -100,8 +101,8 @@ missionRoute.post('/verify',
     }
 
     // เทียบคำตอบที่ผู้เล่นพิมพ์ กับ เฉลยในระบบ
-    // (ใช้ .trim() ตัดช่องว่างหัวท้ายเผื่อผู้เล่นเผลอเคาะ spacebar)
-    const isCorrect = userCommand.trim() === mission.expectedCommand.trim()
+    // (ตัดช่องว่างหัวท้ายเผื่อผู้เล่นเผลอเคาะ spacebar + กติกาตัวพิมพ์ตาม OS)
+    const isCorrect = isAnswerCorrect(os, userCommand, mission.expectedCommand)
 
     // ตอบผิด — จบตรงนี้ ไม่ออกตั๋วผ่านด่าน
     if (!isCorrect) {

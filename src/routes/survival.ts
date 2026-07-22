@@ -6,6 +6,7 @@ import { z } from 'zod'
 import { zValidator } from '@hono/zod-validator'
 import { sign, verify } from 'hono/jwt'
 import { authenticateToken } from '../middlewares/auth'
+import { isAnswerCorrect } from '../lib/answerCheck'
 
 type Bindings = { DB: D1Database; JWT_SECRET: string }
 type Variables = {
@@ -176,7 +177,7 @@ survivalRoute.post('/answer',
       const cleared = Number(session.cleared) || 0
       const attempts = Number(session.attempts) || 0
       const current = questions[cleared % questions.length]
-      const isCorrect = answer.trim() === current.expectedCommand
+      const isCorrect = isAnswerCorrect(session.os, answer, current.expectedCommand)
 
       const now = Date.now()
       let nextSession: PlaySession
