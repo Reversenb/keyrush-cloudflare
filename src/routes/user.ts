@@ -124,7 +124,9 @@ userRoute.get('/progress', async (c) => {
 const profileSchema = z.object({
   displayName: z.string().max(50, 'ชื่อแสดงยาวเกินไป').optional(),
   avatar: z.string().optional(),
-  bio: z.string().max(500, 'ประวัติยาวเกินไป').optional()
+  // ⚠️ ต้องตรงกับ maxLength ของช่องกรอกในหน้า /profile — ที่นี่คือด่านจริง
+  //    (หน้าเว็บกันได้แค่คนพิมพ์ปกติ ยิง API ตรงข้ามหน้าเว็บได้)
+  bio: z.string().max(60, 'ประวัติยาวเกิน 60 ตัวอักษร').optional()
 }).superRefine((data, ctx) => {
   // 🚫 กันคำหยาบ/ชื่อสงวน — ต้องเช็คที่ server เพราะยิง API ตรงได้ ไม่ผ่านหน้าเว็บ
   const nameIssue = checkProfanity(data.displayName, { label: 'ชื่อเล่น', checkReserved: true })

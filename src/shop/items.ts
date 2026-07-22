@@ -29,8 +29,12 @@ export interface ShopItem {
 
 export const SHOP_ITEMS: ShopItem[] = [
   // ===== 🏷️ ฉายา (โชว์ข้างชื่อบน Leaderboard / โปรไฟล์) =====
-  { id: 'title_cs', type: 'title', name: 'Comsci', desc: 'Comsci', price: 50, label: 'Comsci' },
-  { id: 'title_rome', type: 'title', name: 'กรุงโรม', desc: 'กรุงโรมสร้างเสร็จภายในวันเดียว', price: 50, label: 'กรุงโรมสร้างเสร็จภายในวันเดียว' },
+  { id: 'title_senior', type: 'title', name: 'พี่ปีลึก', desc: 'ฉายาสำหรับปี4,ปี5', price: 200, label: 'พี่ปีแก่' },
+  { id: 'title_coding', type: 'title', name: 'เทพCoding', desc: 'ฉายาสำหรับคนที่ชอบเขียนโค๊ด', price: 500, label: 'เทพCoding' },
+  { id: 'title_lnw', type: 'title', name: 'เทพไม่รวมกลุ่ม', desc: 'ฉายาสำหรับคนที่ชอบอยู่คนเดียว', price: 50, label: 'เทพไม่รวมกลุ่ม' },
+   { id: 'title_67', type: 'title', name: '67', desc: 'Six-Seven', price: 67, label: '67' },
+  { id: 'title_cs', type: 'title', name: 'Comsci', desc: 'Comsci', price: 50, label: 'Comsciดิวะ' },
+  { id: 'title_rome', type: 'title', name: 'กรุงโรม', desc: 'ฉายาสำหรับคนที่สร้างเมืองได้ภายในวันเดียว', price: 50, label: 'กรุงโรมสร้างเสร็จภายในวันเดียว' },
   { id: 'title_ai', type: 'title', name: 'Ai ร่างมนุษย์', desc: 'ฉายาสำหรับคนที่ชอบ AI', price: 100, label: 'Ai ร่างมนุษย์' },
   { id: 'title_bid', type: 'title', name: 'นักบิด', desc: 'ฉายาสำหรับสายขี้เกียจ', price: 50, label: 'นักบิด' },
   { id: 'title_sleepless', type: 'title', name: 'นอนน้อยแต่นอนนะ', desc: 'ฉายาสำหรับสายโต้รุ่ง', price: 50, label: 'นอนน้อยแต่นอนนะ' },
@@ -45,7 +49,8 @@ export const SHOP_ITEMS: ShopItem[] = [
   { id: 'title_keyrush_legend', type: 'title', name: 'ตำนาน KeyRush', desc: 'ฉายาสูงสุด — มีไว้อวดได้เลย', price: 3000, label: 'ตำนาน KeyRush' },
 
   // ฉายาสายนักเรียน/นักศึกษา 🎓 (ราคาเบาๆ ไล่ขึ้นตามความเทพ)
-  { id: 'title_back_row', type: 'title', name: 'เด็กหลังห้อง', desc: 'ที่นั่งประจำคือแถวหลังสุด แต่ใจรักการพิมพ์นะ', price: 50, label: 'เด็กหลังห้อง' },
+  { id: 'title_back_row', type: 'title', name: 'เด็กหน้าห้อง', desc: 'ที่นั่งประจำคือแถวหน้าสุด ', price: 50, label: 'เด็กหน้าห้อง' },
+  { id: 'title_back_row', type: 'title', name: 'เด็กหลังห้อง', desc: 'ที่นั่งประจำคือแถวหลังสุด ', price: 50, label: 'เด็กหลังห้อง' },
   { id: 'title_late_riser', type: 'title', name: 'สายตื่นสาย', desc: 'คาบแรกไม่เคยทัน แต่พิมพ์ทันทุกตัวอักษร', price: 80, label: 'สายตื่นสาย' },
   { id: 'title_copy_paste', type: 'title', name: 'เจ้าแห่ง Ctrl+C Ctrl+V', desc: 'ก็อปวางเร็วกว่าแสง (แต่รอบนี้พิมพ์เองจริงๆ)', price: 150, label: 'เจ้าแห่ง Ctrl+C Ctrl+V' },
   { id: 'title_deadline_racer', type: 'title', name: 'นักปั่นเดดไลน์', desc: 'งานเสร็จก่อนเที่ยงคืน 1 นาทีเสมอ ไม่เคยพลาด', price: 200, label: 'นักปั่นเดดไลน์' },
