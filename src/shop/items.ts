@@ -49,7 +49,7 @@ export const SHOP_ITEMS: ShopItem[] = [
   { id: 'title_keyrush_legend', type: 'title', name: 'ตำนาน KeyRush', desc: 'ฉายาสูงสุด — มีไว้อวดได้เลย', price: 3000, label: 'ตำนาน KeyRush' },
 
   // ฉายาสายนักเรียน/นักศึกษา 🎓 (ราคาเบาๆ ไล่ขึ้นตามความเทพ)
-  { id: 'title_back_row', type: 'title', name: 'เด็กหน้าห้อง', desc: 'ที่นั่งประจำคือแถวหน้าสุด ', price: 50, label: 'เด็กหน้าห้อง' },
+  { id: 'title_front_row', type: 'title', name: 'เด็กหน้าห้อง', desc: 'ที่นั่งประจำคือแถวหน้าสุด ', price: 50, label: 'เด็กหน้าห้อง' },
   { id: 'title_back_row', type: 'title', name: 'เด็กหลังห้อง', desc: 'ที่นั่งประจำคือแถวหลังสุด ', price: 50, label: 'เด็กหลังห้อง' },
   { id: 'title_late_riser', type: 'title', name: 'สายตื่นสาย', desc: 'คาบแรกไม่เคยทัน แต่พิมพ์ทันทุกตัวอักษร', price: 80, label: 'สายตื่นสาย' },
   { id: 'title_copy_paste', type: 'title', name: 'เจ้าแห่ง Ctrl+C Ctrl+V', desc: 'ก็อปวางเร็วกว่าแสง (แต่รอบนี้พิมพ์เองจริงๆ)', price: 150, label: 'เจ้าแห่ง Ctrl+C Ctrl+V' },
