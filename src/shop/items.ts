@@ -155,6 +155,13 @@ export const SHOP_ITEMS: ShopItem[] = [
   { id: 'row_void', type: 'row', rowId: 'void', name: 'Void Whisper', desc: 'หมอกมืดสีม่วงคืบคลานจากสองฟาก น่าขนลุก', price: 5500, preview: ['#1e1b4b', '#a78bfa', '#6d28d9'] },
   { id: 'row_galaxy', type: 'row', rowId: 'galaxy', name: 'Starfall Galaxy', desc: 'ทุ่งดาวระยิบ พร้อมดาวตกพาดผ่าน', price: 6000, preview: ['#0f172a', '#a5b4fc', '#e0e7ff'] },
   { id: 'row_glitch', type: 'row', rowId: 'glitch', name: 'Cyber Glitch', desc: 'สัญญาณภาพแตกซ่า RGB สายไซเบอร์พังก์', price: 6500, preview: ['#0a0a0a', '#22d3ee', '#f43f5e'] },
+
+  // ── ระดับอลังการ: หลายชั้นซ้อนกัน เคลื่อนไหวตลอดทั้งช่วงโชว์ ──
+  { id: 'row_aurora', type: 'row', rowId: 'aurora', name: 'Aurora Veil', desc: 'ม่านแสงเหนือพลิ้วไหว เปลี่ยนเฉดสีเขียว-ฟ้า-ม่วงไปเรื่อยๆ ไม่ซ้ำจังหวะ', price: 9000, preview: ['#052e2b', '#34d399', '#a78bfa'] },
+  { id: 'row_meteor', type: 'row', rowId: 'meteor', name: 'Meteor Shower', desc: 'ฝนดาวตกพุ่งเฉียงทั้งแถว หัวสว่างจ้าลากหางยาวเรืองแสง', price: 10000, preview: ['#0f172a', '#38bdf8', '#ffffff'] },
+  { id: 'row_crystal', type: 'row', rowId: 'crystal', name: 'Crystal Prism', desc: 'เกล็ดคริสตัลหักเหแสงเป็นเหลี่ยมคม พร้อมประกายวิบวับ', price: 11500, preview: ['#ecfeff', '#a5f3fc', '#c4b5fd'] },
+  { id: 'row_phoenix', type: 'row', rowId: 'phoenix', name: 'Phoenix Rising', desc: 'ขี้เถ้าเรืองแสงลอยขึ้นจากเปลวเพลิงทอง ดั่งฟีนิกซ์คืนชีพ', price: 13000, preview: ['#7f1d1d', '#f59e0b', '#fef3c7'] },
+  { id: 'row_nebula', type: 'row', rowId: 'nebula', name: 'Nebula Drift', desc: 'เมฆจักรวาลม่วง-ครามลอยสวนทางกันพร้อมดาวกะพริบ — ที่สุดของร้าน', price: 15000, preview: ['#1e1b4b', '#d946ef', '#6366f1'] },
 ]
 
 // หาสินค้าจาก id (ใช้ตอนซื้อ/ใส่ของ)
